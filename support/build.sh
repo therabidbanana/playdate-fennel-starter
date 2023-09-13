@@ -1,0 +1,1 @@
+fennel -c --require-as-include source/main.fnl > source.main.lua

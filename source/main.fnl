@@ -3,12 +3,21 @@
 (lua "import \"CoreLibs/sprites\"")
 (lua "import \"CoreLibs/timer\"")
 
-(local pd playdate)
+;; Patch for missing require
+(global package {:loaded {} :preload {}})
+(fn _G.require [name] 
+  (if [(not (. package.loaded name))]
+    (tset package.loaded name ((?. package.preload name))))
+  (?. package.loaded name))
+;; End patch for missing require
+
+(local test (require :source.test))
+(local pd playdate) 
 (local gfx pd.graphics)
 
 (fn setupGame []
   (let [font (gfx.getFont)
-        greeting "awesome sauce!"
+        greeting test.foo
         w (font:getTextWidth greeting)
         h (font:getHeight)
         x 200

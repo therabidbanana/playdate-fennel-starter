@@ -12,6 +12,7 @@
     "koihik.vscode-lua-format",
     // Build and debug games on the Playdate Simulator
     "midouest.playdate-debug",
+    "kongeor.vsc-fennel"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []
