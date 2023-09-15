@@ -21,23 +21,6 @@
 (fn setupGame []
   (set player (player-ent.new! 20 20))
   (player:add)
-;;(let [font (gfx.getFont)
-;;      greeting test.foo
-
-;;      image  (playdate.graphics.tilemap.new)
-;;      _ (image:setImageTable (playdate.graphics.imagetable.new "images/player"))
-;;      _ (image:setTiles [2 1 2] 8)
-;;      sprite player
-;;      _ (sprite:setBounds 20 20 8 8)
-;;      _ (sprite:setTilemap image)
-;;      
-;;      _ (sprite:add)
-;;      w (font:getTextWidth greeting)
-;;      h (font:getHeight)
-;;      x 200
-;;      y 200]
-;;      
-;;(set player sprite))
 )
 
 (setupGame)
