@@ -13,21 +13,20 @@
 (pd/import "CoreLibs/sprites")
 (pd/import "CoreLibs/timer")
 
-(local player-ent (require :source.entities.player))
-(local pd playdate) 
-(local gfx pd.graphics)
+(let [{:player player-ent} (require :source.entities.core)
+      pd playdate
+      gfx pd.graphics]
 
-(var player nil)
-(fn setupGame []
-  (set player (player-ent.new! 20 20))
-  (player:add)
-)
+  (var player nil)
+  (fn setupGame []
+    (set player (player-ent.new! 20 20))
+    (player:add)
+    )
 
-(setupGame)
+  (setupGame)
 
-(fn pd.update []
-  (gfx.sprite.update)
-  (pd.timer.updateTimers)
-  (pd.drawFPS 0 0)  
-)
- 
+  (fn pd.update []
+    (gfx.sprite.update)
+    (pd.timer.updateTimers)
+    (pd.drawFPS 0 0)
+    ))

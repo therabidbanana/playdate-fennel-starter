@@ -21,5 +21,6 @@
   ],
   // Prevent the language server from linting the PlaydateSDK files
   "Lua.diagnostics.libraryFiles": "Disable",
-  "playdate-debug.sdkPath": "C:\\Users\\David\\Documents\\PlaydateSDK"
+  "playdate-debug.sdkPath": "C:\\Users\\David\\Documents\\PlaydateSDK",
+  "vsc-fnlfmt.execPath": "C:\\Users\\David\\Documents\\WindowsPowerShell\\Scripts\\fnlfmt-sh\\fnlfmt.bat"
 }

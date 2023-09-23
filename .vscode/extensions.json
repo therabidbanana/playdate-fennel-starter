@@ -4,15 +4,13 @@
 
   // List of extensions which should be recommended for users of this workspace.
   "recommendations": [
-    // Lua intellisense
     "sumneko.lua",
-    // Lua syntax highlighting improvements
     "jep-a.lua-plus",
-    // Automatically format lua code
     "koihik.vscode-lua-format",
-    // Build and debug games on the Playdate Simulator
     "midouest.playdate-debug",
-    "kongeor.vsc-fennel"
+    "kongeor.vsc-fennel",
+    "midouest.vsc-fnlfmt",
+    "ailisp.strict-paredit"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []
