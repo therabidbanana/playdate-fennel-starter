@@ -1,4 +1,4 @@
 ;; Core helpers
 
-(let [scenes (require :source.lib.scene-manager)]
-  {: scenes})
+(let [scene-manager (require :source.lib.scene-manager)]
+  {: scene-manager})
