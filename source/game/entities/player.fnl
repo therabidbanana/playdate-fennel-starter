@@ -1,7 +1,8 @@
 (import-macros {: inspect} :source.lib.macros)
 
 (let [pressed? playdate.buttonIsPressed
-      gfx playdate.graphics]
+      gfx playdate.graphics
+      scene-manager (require :source.lib.scene-manager)]
   (fn react! [{: state : height : x : y : width &as self}]
     (let [dy (if (pressed? playdate.kButtonUp) (* -1 state.speed)
                  (pressed? playdate.kButtonDown) (* 1 state.speed)
@@ -19,6 +20,7 @@
                  dy)]
       (tset self :state :dx dx)
       (tset self :state :dy dy)
+      (if (playdate.buttonJustPressed playdate.kButtonB) (scene-manager:select! :menu))
       )
     self)
 

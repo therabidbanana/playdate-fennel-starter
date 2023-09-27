@@ -23,13 +23,7 @@
       blocky (gfx.getSystemFont)]
 
   (scene-manager:load-scenes! (require :source.game.scenes.core))
-
-  (fn setupGame []
-    (scene-manager:select! :menu)
-    ;; (set listview (testScroll))
-    )
-
-  (setupGame)
+  (scene-manager:select! :menu)
 
   (fn pd.update []
     (scene-manager:tick!)

@@ -40,6 +40,7 @@
   listview)
 
 (let [{:player player-ent} (require :source.game.entities.core)
+      scene-manager (require :source.lib.scene-manager)
       pd playdate
       gfx pd.graphics]
 
@@ -56,6 +57,8 @@
                   (listview:selectNextRow)
                   (pressed? playdate.kButtonUp)
                   (listview:selectPreviousRow)
+                  (pressed? playdate.kButtonA)
+                  (scene-manager:select! :title)
                   )
               )
             (pd.timer.updateTimers)

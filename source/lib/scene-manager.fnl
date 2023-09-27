@@ -6,8 +6,12 @@
     (tset $ :scenes table)
     $)
 
+  (fn exit-scene! [$ scene]
+    (if (and scene (?. scene :exit!)) (scene:exit!))
+    (playdate.graphics.sprite.removeAll))
+
   (fn select! [{: active : scenes &as $} name]
-    (if (and active (?. active :exit!)) (active:exit!))
+    (if active ($:exit-scene! active))
     (tset $ :active (?. scenes name))
     ($.active:enter!))
 
@@ -19,6 +23,7 @@
 
   {: add-scene!
    : load-scenes!
+   : exit-scene!
    : select!
    : draw!
    : tick!
