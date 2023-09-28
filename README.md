@@ -23,7 +23,7 @@ To get raw lua file for processing manually, run "make compile", which creates a
 
 ## Prerequisites
 
-You'll need to install lua and fennel tooling separately. I used lua-rocks to install fennel as a binary.
+You'll need to install lua and fennel tooling separately. I used lua-rocks to install fennel as a binary and scoop to install lua, lua-rocks & make on Windows.
 
 ## Playdate SDK
 
