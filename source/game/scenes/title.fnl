@@ -9,12 +9,9 @@
    :exit! (fn scene-exit! [$])
    :tick! (fn scene-tick! [$]
             ;; (listview:drawInRect 180 20 200 200)
-            (pd.timer.updateTimers)
             (gfx.sprite.performOnAllSprites (fn react-each [ent]
                                               (if (?. ent :react!) (ent:react!)))))
    :draw! (fn scene-tick! [$]
-            (gfx.sprite.update)
-            (pd.drawFPS 20 20)
             ;; (listview:drawInRect 180 20 200 200)
-            (pd.timer.updateTimers))})
+            )})
 

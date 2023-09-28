@@ -9,8 +9,18 @@
        result#)))
 
 
+;; https://github.com/bakpakin/Fennel/issues/421#issuecomment-1103070078
 (fn pd/import [lib]
   `(lua ,(.. "import \"" lib "\"")))
 
-{: inspect : pd/import}
+(fn defns [ns-name arr & forms]
+  (let [names (icollect [_ [t name & def] (ipairs forms)]
+                      (if (= t (sym :local)) name (= t (sym :fn) name)))]
+
+    `(let ,arr
+       ,forms
+       ,(collect [_ name (ipairs names)]
+          (values (tostring name) name)))))
+
+{: inspect : pd/import : defns}
 

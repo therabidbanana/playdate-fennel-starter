@@ -60,12 +60,9 @@
               (if (pressed? playdate.kButtonDown) (listview:selectNextRow)
                   (pressed? playdate.kButtonUp) (listview:selectPreviousRow)
                   (pressed? playdate.kButtonA) (scene-manager:select! :title)))
-            (pd.timer.updateTimers)
             (gfx.sprite.performOnAllSprites (fn react-each [ent]
                                               (if (?. ent :react!) (ent:react!)))))
    :draw! (fn scene-tick! [{:state {: listview} &as $}]
-            (gfx.sprite.update)
-            (pd.drawFPS 20 20)
-            (listview:drawInRect 180 20 200 200)
-            (pd.timer.updateTimers))})
+            (listview:drawInRect 180 20 200 200))
+   })
 

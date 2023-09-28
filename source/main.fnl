@@ -13,6 +13,7 @@
 (pd/import :CoreLibs/sprites)
 (pd/import :CoreLibs/timer)
 
+(global $config {:debug true})
 
 (let [{: scene-manager} (require :source.lib.core)]
   (scene-manager:load-scenes! (require :source.game.scenes))
