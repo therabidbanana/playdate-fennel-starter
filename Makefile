@@ -1,5 +1,5 @@
 compile: source/**/*.fnl
-	powershell.exe "./build.ps1"
+	powershell.exe "./support/build.ps1"
 
 build: compile
 	powershell.exe "pdc source test.pdx"
