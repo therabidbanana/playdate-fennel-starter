@@ -1,4 +1,4 @@
-(import-macros {: inspect : pd/import} :source.lib.macros)
+(import-macros {: inspect : pd/import : defns} :source.lib.macros)
 
 (pd/import :CoreLibs/ui)
 (pd/import :CoreLibs/nineslice)
@@ -45,24 +45,27 @@
 
   listview)
 
-(let [{:player player-ent} (require :source.game.entities.core)
+(defns scene
+  [{:player player-ent} (require :source.game.entities.core)
       scene-manager (require :source.lib.scene-manager)
+      ui (require :source.lib.ui)
       pd playdate
       gfx pd.graphics]
-  {:enter! (fn scene-enter! [$]
-             (tset $ :state :listview (testScroll pd gfx)))
-   :state {}
-   :exit! (fn scene-exit! [$]
-            (tset $ :state {}))
-   :tick! (fn scene-tick! [{:state {: listview} &as $}]
-            ;; (listview:drawInRect 180 20 200 200)
-            (let [pressed? playdate.buttonJustPressed]
-              (if (pressed? playdate.kButtonDown) (listview:selectNextRow)
-                  (pressed? playdate.kButtonUp) (listview:selectPreviousRow)
-                  (pressed? playdate.kButtonA) (scene-manager:select! :title)))
-            (gfx.sprite.performOnAllSprites (fn react-each [ent]
-                                              (if (?. ent :react!) (ent:react!)))))
-   :draw! (fn scene-tick! [{:state {: listview} &as $}]
-            (listview:drawInRect 180 20 200 200))
-   })
+
+  (local state {})
+  (fn enter! [$]
+    (tset $ :state :listview (testScroll pd gfx)))
+  (fn exit! [$]
+    (tset $ :state {}))
+  (fn tick! [{:state {: listview} &as $}]
+    ;; (listview:drawInRect 180 20 200 200)
+    (let [pressed? playdate.buttonJustPressed]
+      (if (pressed? playdate.kButtonDown) (listview:selectNextRow)
+          (pressed? playdate.kButtonUp) (listview:selectPreviousRow)
+          (pressed? playdate.kButtonA) (scene-manager:select! :title)))
+    (gfx.sprite.performOnAllSprites (fn react-each [ent]
+                                      (if (?. ent :react!) (ent:react!)))))
+  (fn draw! [{:state {: listview} &as $}]
+    (listview:drawInRect 180 20 200 200))
+  )
 
