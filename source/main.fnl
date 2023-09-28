@@ -1,31 +1,24 @@
-;; Patch for missing require, weird import
+;; Patch for missing require
 (global package {:loaded {} :preload {}})
 (fn _G.require [name]
   (if (not (. package.loaded name))
       (tset package.loaded name ((?. package.preload name))))
   (?. package.loaded name))
+;; End patch for missing require
 
-(macro pd/import [lib]
-  `(lua ,(.. "import \"" lib "\"")))
-;; End patch for missing require, weird import
+(import-macros {: inspect : pd/import} :source.lib.macros)
 
 (pd/import :CoreLibs/object)
 (pd/import :CoreLibs/graphics)
 (pd/import :CoreLibs/sprites)
 (pd/import :CoreLibs/timer)
-(pd/import :CoreLibs/ui)
-(pd/import :CoreLibs/nineslice)
 
-(import-macros {: inspect} :source.lib.macros)
 
-(let [{: scene-manager} (require :source.lib.core)
-      pd playdate
-      gfx pd.graphics
-      blocky (gfx.getSystemFont)]
-  (scene-manager:load-scenes! (require :source.game.scenes.core))
+(let [{: scene-manager} (require :source.lib.core)]
+  (scene-manager:load-scenes! (require :source.game.scenes))
   (scene-manager:select! :menu)
 
-  (fn pd.update []
+  (fn playdate.update []
     (scene-manager:tick!)
     (scene-manager:draw!)))
 

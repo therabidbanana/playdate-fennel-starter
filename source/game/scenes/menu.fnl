@@ -1,4 +1,7 @@
-(import-macros {: inspect} :source.lib.macros)
+(import-macros {: inspect : pd/import} :source.lib.macros)
+
+(pd/import :CoreLibs/ui)
+(pd/import :CoreLibs/nineslice)
 
 (fn testScroll [pd gfx]
   (local menu-options [:Sword

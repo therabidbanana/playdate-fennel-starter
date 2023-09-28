@@ -1,12 +1,24 @@
 compile: source/**/*.fnl
-	powershell.exe "./support/build.ps1"
+	./support/build.sh
 
 build: compile
-	powershell.exe "pdc source test.pdx"
+	pdc source test.pdx
 
 launch: build
-	powershell.exe "playdate test.pdx"
+	playdate test.pdx
 
 clean:
-	powershell.exe "rm test.pdx"
-	powershell.exe "rm source/main.lua"
+	rm ./source/main.lua ./test.pdx
+
+win-compile: source/**/*.fnl
+	powershell.exe "./support/build.ps1"
+
+win-build: win-compile
+	powershell.exe "pdc source test.pdx"
+
+win-launch: win-build
+	powershell.exe "playdate test.pdx"
+
+win-clean:
+	powershell.exe -noprofile -command "& {rm ./source/main.lua}"
+	powershell.exe -noprofile -command "& {rm ./test.pdx}"

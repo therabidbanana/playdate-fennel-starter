@@ -8,5 +8,9 @@
            (print (.. ,inspected " => " ,val)))
        result#)))
 
-{: inspect}
+
+(fn pd/import [lib]
+  `(lua ,(.. "import \"" lib "\"")))
+
+{: inspect : pd/import}
 
