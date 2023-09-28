@@ -27,5 +27,5 @@
    : select!
    : draw!
    : tick!
-   :scenes {}
-   })
+   :scenes {}})
+

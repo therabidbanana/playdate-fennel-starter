@@ -7,10 +7,8 @@
     (let [dy (if (pressed? playdate.kButtonUp) (* -1 state.speed)
                  (pressed? playdate.kButtonDown) (* 1 state.speed)
                  0)
-          dx (if (pressed? playdate.kButtonLeft)
-                 (* -1 state.speed)
-                 (pressed? playdate.kButtonRight)
-                 (* 1 state.speed)
+          dx (if (pressed? playdate.kButtonLeft) (* -1 state.speed)
+                 (pressed? playdate.kButtonRight) (* 1 state.speed)
                  0)
           dx (if (and (>= (+ x width) 400) (> dx 0)) 0
                  (and (<= x 0) (< dx 0)) 0
@@ -20,8 +18,8 @@
                  dy)]
       (tset self :state :dx dx)
       (tset self :state :dy dy)
-      (if (playdate.buttonJustPressed playdate.kButtonB) (scene-manager:select! :menu))
-      )
+      (if (playdate.buttonJustPressed playdate.kButtonB)
+          (scene-manager:select! :menu)))
     self)
 
   (fn update [{:state {: dx : dy : visible} &as self}]

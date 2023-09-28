@@ -1,25 +1,20 @@
-(import-macros {: inspect } :source.lib.macros)
+(import-macros {: inspect} :source.lib.macros)
 (let [{:player player-ent} (require :source.game.entities.core)
       pd playdate
       gfx pd.graphics]
-
   {:enter! (fn scene-enter! [$]
              (var player nil)
              (set player (player-ent.new! 20 20))
-             (player:add)
-             )
+             (player:add))
    :exit! (fn scene-exit! [$])
    :tick! (fn scene-tick! [$]
             ;; (listview:drawInRect 180 20 200 200)
-
             (pd.timer.updateTimers)
-            (gfx.sprite.performOnAllSprites
-             (fn react-each [ent] (if (?. ent :react!) (ent:react!))))
-            )
+            (gfx.sprite.performOnAllSprites (fn react-each [ent]
+                                              (if (?. ent :react!) (ent:react!)))))
    :draw! (fn scene-tick! [$]
             (gfx.sprite.update)
             (pd.drawFPS 20 20)
             ;; (listview:drawInRect 180 20 200 200)
-            (pd.timer.updateTimers)
-            )
-   })
+            (pd.timer.updateTimers))})
+
