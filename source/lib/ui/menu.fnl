@@ -1,10 +1,13 @@
-(import-macros {: defns : pd/import} :source.lib.macros)
+(import-macros {: inspect : defns : pd/import} :source.lib.macros)
 
 (pd/import :CoreLibs/ui)
 (pd/import :CoreLibs/nineslice)
+(pd/import :CoreLibs/animator)
+(pd/import :CoreLibs/easing)
 
 (defns :source.lib.ui.menu
-  [pd playdate gfx playdate.graphics]
+  [pd playdate
+   gfx playdate.graphics]
 
   (fn -draw-cell [{: options &as view}
                   section
@@ -25,26 +28,38 @@
           (gfx.setColor gfx.kColorWhite)
           (gfx.fillRoundRect x y width height 4)
           (gfx.setImageDrawMode gfx.kDrawModeCopy)))
-    (gfx.drawTextInRect (?. options row :text) (+ x 2) (+ y 2) (- width 4)
+    (gfx.drawTextInRect (?. options row :text) (+ x 4) (+ y 4) (- width 8)
                         height nil))
 
   (fn -handle-click [{: action : keep-open?} $ui]
     (if action (action))
     (if (not keep-open?) ($ui:pop-component!)))
 
-  (fn render! [{: view &as comp} $ui]
+  (fn render! [{: view : rect &as comp} $ui]
     ;; needsDisplay note - sprite update sometimes wipes area
-    (view:drawInRect 180 20 200 200))
+    (view:drawInRect (rect:unpack)))
 
-  (fn tick! [{: view &as comp} $ui]
+  (fn tick! [{: view : anim-w : anim-h &as comp} $ui]
     (let [pressed? playdate.buttonJustPressed
           selected (?. view.options (view:getSelectedRow))]
+      (if anim-h
+          (set comp.rect.height (anim-h:currentValue)))
+      (if anim-w
+          (set comp.rect.width (anim-w:currentValue)))
       (if (pressed? playdate.kButtonDown) (view:selectNextRow)
           (pressed? playdate.kButtonUp) (view:selectPreviousRow)
           (pressed? playdate.kButtonA) (-handle-click selected $ui))))
 
-  (fn new! [proto $ui {: options}]
+  (fn new! [proto $ui {: options : x : y : w : h : animate?}]
     (let [view (playdate.ui.gridview.new 0 10)
+          animate? true
+          rect (playdate.geometry.rect.new (or x 10) (or y 10)
+                                           (if animate? 0 w w 180)
+                                           (if animate? 0 h h 220))
+          anim-w (if animate?
+                     (playdate.graphics.animator.new 150 10 (or w 180) playdate.easingFunctions.easeOutCubic))
+          anim-h (if animate?
+                     (playdate.graphics.animator.new 150 10 (or h 220) playdate.easingFunctions.easeOutCubic))
           bg (gfx.nineSlice.new :assets/images/scrollbg 8 14 100 36)]
       (doto view
         (tset :backgroundImage bg)
@@ -52,7 +67,9 @@
         (tset :drawCell -draw-cell)
         (: :setNumberOfRows (length options))
         (: :setCellPadding 0 0 5 4)
-        (: :setCellSize 0 40)
+        (: :setCellSize 0 24)
         (: :setContentInset 8 8 12 11))
-      (table.shallowcopy proto {: view}))))
+      (table.shallowcopy proto {: view : rect : anim-w : anim-h}))
+    )
+  )
 
