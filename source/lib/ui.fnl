@@ -1,7 +1,8 @@
 (import-macros {: defns : inspect} :source.lib.macros)
 
 (defns :$ui
-  [menu (require :source.lib.ui.menu)]
+  [menu (require :source.lib.ui.menu)
+   text (require :source.lib.ui.textbox)]
 
   (local stack [])
   (fn push-component! [$ui comp]
@@ -23,5 +24,8 @@
 
   (fn open-menu! [$ui props]
     ($ui:push-component! (menu:new! $ui props))
+    )
+  (fn open-textbox! [$ui props]
+    ($ui:push-component! (text:new! $ui props))
     )
   )

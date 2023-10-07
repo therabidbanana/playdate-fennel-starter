@@ -32,8 +32,8 @@
                         height nil))
 
   (fn -handle-click [{: action : keep-open?} $ui]
-    (if action (action))
-    (if (not keep-open?) ($ui:pop-component!)))
+    (if (not keep-open?) ($ui:pop-component!))
+    (if action (action)))
 
   (fn render! [{: view : rect &as comp} $ui]
     ;; needsDisplay note - sprite update sometimes wipes area
@@ -52,7 +52,6 @@
 
   (fn new! [proto $ui {: options : x : y : w : h : animate?}]
     (let [view (playdate.ui.gridview.new 0 10)
-          animate? true
           rect (playdate.geometry.rect.new (or x 10) (or y 10)
                                            (if animate? 0 w w 180)
                                            (if animate? 0 h h 220))

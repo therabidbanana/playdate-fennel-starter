@@ -9,7 +9,14 @@
 
   (local state {})
   (fn enter! [$]
-    ($ui:open-menu! {:options [{:text "Foo"}
+    ($ui:open-menu! {:options [{:text "Foo" :action #($ui:open-textbox! {:text "While Lua will automatically close an open file handle when it's garbage collected, GC may not run right away; with-open ensures handles are closed immediately, error or no, without boilerplate.
+
+The usage is similar to let, except:
+
+    destructuring is disallowed (symbols only on the left-hand side)
+    every binding should be a file handle or other value with a :close method.
+
+After executing the body, or upon encountering an error, with-open will invoke (value:close) on every bound variable before returning the results."})}
                                {:text "Bar [!]" :action #(scene-manager:select! :title)}
                                {:text "Quux"}
                                {:text "Qux" :keep-open? true}
