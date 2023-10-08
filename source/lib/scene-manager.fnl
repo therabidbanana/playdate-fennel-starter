@@ -9,8 +9,10 @@
     $)
 
   (fn exit-scene! [$ scene]
+    (gfx.clear)
     (if (and scene (?. scene :exit!)) (scene:exit!))
-    (sprite.removeAll))
+    (sprite.removeAll)
+    )
 
   (fn select! [{: active : scenes &as $} name]
     (if active ($:exit-scene! active))
