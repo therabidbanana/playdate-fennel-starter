@@ -9,6 +9,8 @@
     $)
 
   (fn exit-scene! [$ scene]
+    (tset $ :last-screen (gfx.getDisplayImage))
+    (tset $ :fade-out-anim (playdate.graphics.animator.new 250 0 -400 playdate.easingFunctions.easeOutCubic))
     (gfx.clear)
     (if (and scene (?. scene :exit!)) (scene:exit!))
     (sprite.removeAll)
@@ -24,10 +26,18 @@
     (timer.updateTimers)
     )
 
-  (fn draw! [{: active &as $}]
+  (fn draw! [{: active : fade-out-anim : last-screen &as $}]
     (sprite.update)
     (if $config.debug (playdate.drawFPS 20 20))
     (if (and active (?. active :draw!)) (active:draw!))
+    (if (and fade-out-anim (fade-out-anim:ended))
+        (do
+          (tset $ :fade-out-anim nil)
+          (tset $ :last-screen nil))
+        (and fade-out-anim last-screen)
+        ;; Transition by sliding left
+        (last-screen:draw (fade-out-anim:currentValue) 0)
+        )
     )
 
   {: add-scene!
