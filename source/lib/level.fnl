@@ -3,11 +3,11 @@
 (defns :source.lib.level
   [gfx playdate.graphics]
 
-  (fn prepare-layer [{: imagetable : tiles : w : h}]
+  (fn prepare-layer [{: imagetable : tiles : grid-w : grid-h}]
     (let [tileset (gfx.imagetable.new imagetable)
           tilemap (gfx.tilemap.new)
           _       (tilemap:setImageTable tileset)]
-      (tilemap:setSize w h)
+      (tilemap:setSize grid-w grid-h)
       (each [_ {: x : y : tile} (ipairs tiles)]
         (tilemap:setTileAtPosition x y tile))
       {: tilemap}))

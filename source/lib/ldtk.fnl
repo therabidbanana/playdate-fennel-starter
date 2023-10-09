@@ -12,7 +12,10 @@
         tile-h (tonumber tile-h)
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
                 {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})]
-    {: imagetable : tiles : tile-w : tile-h :w (// map-width tile-w) :h (// map-height tile-h)}))
+    {: imagetable : tiles : tile-w : tile-h
+     :map-w map-width :map-h map-height
+     :grid-w (// map-width tile-w) :grid-h (// map-height tile-h)
+     }))
 
 (fn parse-level [{: layerInstances :pxWid w :pxHei h}]
   (let [layers (icollect [_ layer (ipairs layerInstances)]

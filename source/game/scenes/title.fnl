@@ -1,17 +1,19 @@
 (import-macros {: defns : inspect} :source.lib.macros)
-(import-macros {: deflevel} :source.lib.ldtk-macros)
+(import-macros {: deflevel} :source.lib.ldtk.macros)
 
 
 (deflevel :Level_0
   [{:player player-ent} (require :source.game.entities.core)
-   ;; ldtk (require :source.lib.ldtk-loader)
+   ldtk (require :source.lib.ldtk.loader)
    {: prepare-level} (require :source.lib.level)
    pd playdate
    gfx pd.graphics]
 
   (fn enter! [$]
     (let [player (player-ent.new! 20 20)
+          ;; Option 1 - Loads at runtime
           ;; loaded (prepare-level (ldtk.load-level {:level 0}))
+          ;; Option 2 - relies on deflevel compiling
           loaded (prepare-level Level_0)
           layer (?. loaded :layers 1)
           bg (gfx.sprite.new)
@@ -23,7 +25,7 @@
       (tset $ :layer layer)
       (player:add)
       (bg:add)
-      ;; (printTable (ldtk.load-level 0))
+      (printTable (ldtk.load-level {:level 0}))
       )
     )
 
