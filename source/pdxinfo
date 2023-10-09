@@ -4,5 +4,5 @@ description=Fennel Test Game
 bundleID=com.davidhaslem.fennel-test
 version=1.0
 buildNumber=1
-imagePath=system
+imagePath=assets
 launchSoundPath=

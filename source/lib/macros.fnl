@@ -13,16 +13,17 @@
 (fn pd/import [lib]
   `(lua ,(.. "import \"" lib "\"")))
 
-(fn defns [ns-name arr & forms]
+(fn defns [ns-name bindings & forms]
   (let [names (icollect [_ [t name & def] (ipairs forms)]
                       (if (= t (sym :local)) name
                           (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
               (values (tostring name) name))]
 
-    `(let ,arr
+    `(let ,bindings
        ,forms
        ,map)))
 
-{: inspect : pd/import : defns}
+
+{: inspect : pd/import : defns }
 

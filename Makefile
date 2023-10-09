@@ -2,7 +2,8 @@ compile: source/**/*.fnl
 	./support/build.sh
 
 build: compile
-	pdc source test.pdx
+	pdc -k source test.pdx
+	cp source/*.ldtk test.pdx/
 
 launch: build
 	playdate test.pdx
@@ -14,7 +15,8 @@ win-compile: source/**/*.fnl
 	powershell.exe "./support/build.ps1"
 
 win-build: win-compile
-	powershell.exe "pdc source test.pdx"
+	powershell.exe "pdc -k source test.pdx"
+	powershell.exe "cp source/*.ldtk test.pdx/"
 
 win-launch: win-build
 	powershell.exe "playdate test.pdx"

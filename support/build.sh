@@ -1,1 +1,1 @@
-fennel -c --require-as-include source/main.fnl > source.main.lua
+fennel -c --require-as-include --no-compiler-sandbox source/main.fnl > source.main.lua
