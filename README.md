@@ -25,11 +25,13 @@ To get raw lua file for processing manually, run "make compile", which creates a
 
 You'll need to install lua and fennel tooling separately. I used lua-rocks to install fennel as a binary and scoop to install lua, lua-rocks & make on Windows.
 
+For LDtk macro support, you'll also need to install "lunajson" via lua-rocks (alternatively, you can use the SDK's json loader).
+
 ## Playdate SDK
 
 Install the Playdate SDK from the website: https://play.date/dev
 
-`pdc` and `playdate` are expected to be available on the path.
+`pdc` and `playdate` (alias for PlaydateSimulator) are expected to be available on the path.
 
 ### windows pdc/playdate:
 

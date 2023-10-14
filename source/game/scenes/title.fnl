@@ -1,6 +1,5 @@
-(import-macros {: defns : inspect} :source.lib.macros)
+(import-macros {: pd/import : defns : inspect} :source.lib.macros)
 (import-macros {: deflevel} :source.lib.ldtk.macros)
-
 
 (deflevel :Level_0
   [{:player player-ent} (require :source.game.entities.core)
@@ -25,7 +24,7 @@
       (tset $ :layer layer)
       (player:add)
       (bg:add)
-      (printTable (ldtk.load-level {:level 0}))
+      ;; (printTable (ldtk.load-level {:level 0}))
       )
     )
 
