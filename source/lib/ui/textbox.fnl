@@ -3,6 +3,7 @@
 (pd/import :CoreLibs/ui)
 (pd/import :CoreLibs/nineslice)
 (pd/import :CoreLibs/animator)
+(pd/import :CoreLibs/animation)
 (pd/import :CoreLibs/easing)
 
 
@@ -42,9 +43,41 @@
           (gfx.fillRoundRect rect 4)
           (gfx.setLineWidth 2)
           (gfx.setColor gfx.kColorBlack)
-          (gfx.drawRoundRect rect 4)))
+          (gfx.drawRoundRect rect 4)
+          (if view.nametag
+              (view.nametag:draw (+ rect.x 4) (- rect.y 8)))))
     (let [text (string.sub (?. view :pages view.currentPageNum) 1 view.chars)]
-      (gfx.drawTextInRect text textRect)))
+      (gfx.drawTextInRect text textRect)
+      ;; (gfx.drawRoundRect textRect 2)
+      ))
+
+  (fn build-nametag [{: nametag }]
+    (let [old-font (gfx.getFont)
+          name-font (gfx.font.new :assets/fonts/Nontendo-Bold)
+          padding 3
+          double  (* 2 padding)
+          h (name-font:getHeight)
+          w (name-font:getTextWidth nametag)
+          image (gfx.image.new (+ w (* 2 double)) (+ h double))]
+      (gfx.lockFocus image)
+      (gfx.setColor gfx.kColorWhite)
+      (gfx.fillRoundRect 0 0 (+ w (* 2 double)) (+ h double) 3)
+      (gfx.setColor gfx.kColorBlack)
+      (gfx.drawRoundRect 0 0 (+ w (* 2 double)) (+ h double) 3)
+      (name-font:drawText nametag double padding)
+      (gfx.unlockFocus)
+      image))
+
+  (fn page-animator [page opts]
+    (let [{: per-char : delay?} (or opts {})
+          ms-per-char   (or per-char 15)
+          chars-in-page (string.len page)
+          delay?        (or delay? 0)]
+      (playdate.graphics.animator.new
+       (* chars-in-page ms-per-char)
+       0 chars-in-page
+       playdate.easingFunctions.linear
+       delay?)))
 
   (fn tick! [{: view : anim-w : anim-h : anim-text : finished? &as comp} $ui]
     (let [pressed? playdate.buttonJustPressed
@@ -54,7 +87,8 @@
           currPage (?. view.pages view.currentPageNum)
           chars (if finished? (string.len currPage)
                     (math.floor (anim-text:currentValue)))
-          justPressedA (pressed? playdate.kButtonA)]
+          justPressedA (pressed? playdate.kButtonA)
+          next-page (+ view.currentPageNum 1)]
       (if anim-h
           (set comp.rect.height (anim-h:currentValue)))
       (if anim-w
@@ -63,38 +97,36 @@
             (if lastPage
                 ($ui:pop-component!)
                 (do
-                  (comp.anim-text:reset)
                   (tset comp :finished? false)
-                  (tset comp.view :currentPageNum (+ view.currentPageNum 1))
+                  (tset comp.view :currentPageNum next-page)
+                  (tset comp :anim-text (page-animator (?. view.pages next-page)))
                   (tset comp.view :chars 0)))
           justPressedA
           (tset comp :finished? true)
           chars
           (tset comp.view :chars chars))))
 
-  (fn new! [proto $ui {: text : x : y : w : h : animate-in? : padding}]
+  (fn new! [proto $ui {: text : nametag : x : y : w : h : animate-in? : padding}]
     (let [frame (playdate.ui.gridview.new 0 10)
-          padding (or padding 8)
           padding-top (or padding 10)
-          rect (playdate.geometry.rect.new (or x 5) (or y 140)
+          padding (or padding 8)
+          rect (playdate.geometry.rect.new (or x 5) (or y 156)
                                            (if animate-in? 0 w w 390)
-                                           (if animate-in? 0 h h 98))
+                                           (if animate-in? 0 h h 82))
           textRect (rect:insetBy padding padding-top)
+          _ (if nametag (tset textRect :y (+ textRect.y 4)))
           anim-w (if animate-in?
                      (playdate.graphics.animator.new 150 10 (or w 380) playdate.easingFunctions.easeOutCubic))
           anim-h (if animate-in?
                      (playdate.graphics.animator.new 150 10 (or h 120) playdate.easingFunctions.easeOutCubic))
           pages (-paginated-string text textRect)
           chars-per-page (string.len (?. pages 1))
-          anim-text (playdate.graphics.animator.new (* chars-per-page 15)
-                                                    0 chars-per-page
-                                                    playdate.easingFunctions.linear
-                                                    ;; Delay for box animation
-                                                    (if animate-in? 150 0))
+          anim-text (page-animator (?. pages 1) {:delay? (if animate-in? 150 0)})
           ;; bg (gfx.nineSlice.new :assets/images/scrollbg 8 14 100 36)
           bg nil
           finished? false
-          view {:backgroundImage bg : pages :currentPageNum 1 :chars 0}]
+          nametag (if nametag (build-nametag {: nametag}))
+          view {:backgroundImage bg : nametag : pages :currentPageNum 1 :chars 0}]
       (table.shallowcopy proto {: view : rect : textRect : anim-w : anim-h : anim-text : finished?}))
     )
   )

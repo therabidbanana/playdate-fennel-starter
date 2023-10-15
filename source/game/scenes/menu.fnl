@@ -9,9 +9,9 @@
 
   (local state {})
   (fn enter! [$]
-    ($ui:open-menu! {:options [{:text "Foo" :action #($ui:open-textbox! {:text (gfx.getLocalizedText "textbox.test2")})}
+    ($ui:open-menu! {:options [{:text "Foo" :action #($ui:open-textbox! {:text (gfx.getLocalizedText "textbox.test2") :nametag "Picarding"})}
                                {:text "Bar [!]" :action #(scene-manager:select! :title)}
-                               {:text "Quux"}
+                               {:text "Quux" :action #($ui:open-textbox! {:text (gfx.getLocalizedText "textbox.test2")})}
                                {:text "Qux" :keep-open? true}
                                {:text "Corge"}
                                {:text "Grault"}
