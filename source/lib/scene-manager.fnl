@@ -1,5 +1,10 @@
+(import-macros {: inspect : defns : pd/import} :source.lib.macros)
+
+(pd/import :CoreLibs/animation)
+
 (let [gfx playdate.graphics
       timer playdate.timer
+      animation  gfx.animation
       sprite gfx.sprite]
   (fn add-scene! [$ name scene]
     (doto $ (tset :scenes name scene)))
@@ -10,7 +15,7 @@
 
   (fn exit-scene! [$ scene]
     (tset $ :last-screen (gfx.getDisplayImage))
-    (tset $ :fade-out-anim (playdate.graphics.animator.new 250 0 -400 playdate.easingFunctions.easeOutCubic))
+    (tset $ :fade-out-anim (playdate.graphics.animator.new 300 0 -400 playdate.easingFunctions.easeOutCubic))
     (gfx.clear)
     (if (and scene (?. scene :exit!)) (scene:exit!))
     (sprite.removeAll)
@@ -24,6 +29,7 @@
   (fn tick! [{: active &as $}]
     (if (and active (?. active :tick!)) (active:tick!))
     (timer.updateTimers)
+    (animation.blinker.updateAll)
     )
 
   (fn draw! [{: active : fade-out-anim : last-screen &as $}]

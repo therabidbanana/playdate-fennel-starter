@@ -26,8 +26,7 @@
     (if ($ui:active?) ($ui:tick!)
         (let [pressed? playdate.buttonJustPressed]
           (if (pressed? playdate.kButtonA) (scene-manager:select! :title)))
-        (gfx.sprite.performOnAllSprites (fn react-each [ent]
-                                          (if (?. ent :react!) (ent:react!))))))
+        ))
   (fn draw! [{:state {: listview} &as $}]
     ($ui:render!)
     ;; (listview:drawInRect 180 20 200 200)

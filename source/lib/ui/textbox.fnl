@@ -44,16 +44,18 @@
           (gfx.setLineWidth 2)
           (gfx.setColor gfx.kColorBlack)
           (gfx.drawRoundRect rect 4)
-          (if view.nametag
-              (view.nametag:draw (+ rect.x 4) (- rect.y 8)))))
-    (let [text (string.sub (?. view :pages view.currentPageNum) 1 view.chars)]
+          ))
+    (if view.nametag
+        (view.nametag:draw (+ rect.x 4) (- rect.y 8)))
+    (let [text (string.sub (?. view :pages view.currentPageNum) 1 view.chars)
+          corner-x (- (+ rect.x rect.w) 14)
+          corner-y (- (+ rect.y rect.h) 15)]
       (gfx.drawTextInRect text textRect)
-      ;; (gfx.drawRoundRect textRect 2)
+      (view.button:draw corner-x (+ corner-y (if view.blinker.on 1 0)))
       ))
 
   (fn build-nametag [{: nametag }]
-    (let [old-font (gfx.getFont)
-          name-font (gfx.font.new :assets/fonts/Nontendo-Bold)
+    (let [name-font (gfx.font.new :assets/fonts/Nontendo-Bold)
           padding 3
           double  (* 2 padding)
           h (name-font:getHeight)
@@ -119,6 +121,8 @@
                      (playdate.graphics.animator.new 150 10 (or w 380) playdate.easingFunctions.easeOutCubic))
           anim-h (if animate-in?
                      (playdate.graphics.animator.new 150 10 (or h 120) playdate.easingFunctions.easeOutCubic))
+          blinker (doto (playdate.graphics.animation.blinker.new) (: :start 800 300 true))
+          button (gfx.image.new :assets/images/button-a)
           pages (-paginated-string text textRect)
           chars-per-page (string.len (?. pages 1))
           anim-text (page-animator (?. pages 1) {:delay? (if animate-in? 150 0)})
@@ -126,7 +130,7 @@
           bg nil
           finished? false
           nametag (if nametag (build-nametag {: nametag}))
-          view {:backgroundImage bg : nametag : pages :currentPageNum 1 :chars 0}]
+          view {:backgroundImage bg : nametag : pages :currentPageNum 1 :chars 0 : blinker : button}]
       (table.shallowcopy proto {: view : rect : textRect : anim-w : anim-h : anim-text : finished?}))
     )
   )
