@@ -3,7 +3,10 @@
 (defns :source.lib.level
   [gfx playdate.graphics]
 
-  (fn prepare-layer [{: imagetable : tiles : grid-w : grid-h}]
+  (fn prepare-entity-layer [{: entities : grid-w : grid-h}]
+    {: entities})
+
+  (fn prepare-tile-layer [{: imagetable : tiles : grid-w : grid-h}]
     (let [tileset (gfx.imagetable.new imagetable)
           tilemap (gfx.tilemap.new)
           _       (tilemap:setImageTable tileset)]
@@ -13,6 +16,12 @@
       {: tilemap}))
 
   (fn prepare-level [{: layers : w : h}]
-    (let [layers (icollect [_ l (ipairs layers)] (prepare-layer l))]
-      {: layers : w : h}))
+    (let [tile-layers (icollect [_ { : layer-type &as l} (ipairs layers)]
+                   (if (= :Tiles layer-type)
+                       (prepare-tile-layer l)))
+          entity-layers (icollect [_ { : layer-type &as l} (ipairs layers)]
+                        (if (= :Entities layer-type)
+                            (prepare-entity-layer l)
+                            ))]
+      {: tile-layers : entity-layers : w : h}))
   )

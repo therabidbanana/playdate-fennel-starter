@@ -5,14 +5,24 @@
          level))
    1))
 
-(fn parse-layer [{:__tilesetRelPath imagetable :gridTiles tiles :__gridSize grid-size}
+(fn parse-layer [{:__tilesetRelPath imagetable
+                  :__type layer-type
+                  :gridTiles tiles
+                  :entityInstances entities
+                  :__gridSize grid-size}
                  {:w map-width :h map-height}]
-  (let [(_ _ tile-w tile-h)   (string.find imagetable ".+%-table%-(%d+)%-(%d+)%..+")
-        tile-w (tonumber tile-w)
-        tile-h (tonumber tile-h)
+  (let [(_ _ tile-w tile-h)   (if imagetable
+                                  (string.find imagetable ".+%-table%-(%d+)%-(%d+)%..+")
+                                  (values nil nil grid-size grid-size))
+        tile-w (tonumber (or tile-w grid-size))
+        tile-h (tonumber (or tile-h grid-size))
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
-                {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})]
+                {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})
+        entities (icollect [_ {:px [x y] :__identifier id} (ipairs entities)]
+                   {:x x :y y : id })
+        ]
     {: imagetable : tiles : tile-w : tile-h
+     : layer-type : entities
      :map-w map-width :map-h map-height
      :grid-w (// map-width tile-w) :grid-h (// map-height tile-h)
      }))

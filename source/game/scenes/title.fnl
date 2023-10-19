@@ -14,15 +14,19 @@
           ;; loaded (prepare-level (ldtk.load-level {:level 0}))
           ;; Option 2 - relies on deflevel compiling
           loaded (prepare-level Level_0)
-          layer (?. loaded :layers 1)
+          layer (?. loaded :tile-layers 1)
+          entities (?. loaded :entity-layers 1)
           bg (gfx.sprite.new)
           ]
+      (each [_ {: id : x : y} (ipairs entities.entities)]
+        (case id
+          :Player_start (-> (player-ent.new! x y) (: :add))))
       (bg:setTilemap layer.tilemap)
       (bg:setCenter 0 0)
       (bg:moveTo 0 0)
       (bg:setZIndex -100)
       (tset $ :layer layer)
-      (player:add)
+      ;; (player:add)
       (bg:add)
       ;; (printTable (ldtk.load-level {:level 0}))
       )
