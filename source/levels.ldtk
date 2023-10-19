@@ -11,7 +11,7 @@
 	"iid": "7e489f20-6280-11ee-94e3-4b3019ff8156",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 6,
+	"nextUid": 7,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -136,7 +136,43 @@
 			"limitBehavior": "MoveLastOne",
 			"pivotX": 0,
 			"pivotY": 0,
-			"fieldDefs": []
+			"fieldDefs": [
+				{
+					"identifier": "name",
+					"doc": null,
+					"__type": "String",
+					"uid": 6,
+					"type": "F_String",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "NameAndValue",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				}
+			]
 		}
 	], "tilesets": [
 		{
@@ -210,19 +246,22 @@
 					"entityInstances": [
 						{
 							"__identifier": "Player_start",
-							"__grid": [6,1],
+							"__grid": [3,6],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 1, "x": 0, "y": 16, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": 96,
-							"__worldY": 16,
+							"__worldX": 48,
+							"__worldY": 96,
 							"iid": "fcc1d950-6280-11ee-a58a-f5307a769266",
 							"width": 16,
 							"height": 16,
 							"defUid": 4,
-							"px": [96,16],
-							"fieldInstances": []
+							"px": [48,96],
+							"fieldInstances": [{ "__identifier": "name", "__type": "String", "__value": "Banana", "__tile": null, "defUid": 6, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["Banana"]
+							}] }]
 						}
 					]
 				},

@@ -18,8 +18,11 @@
         tile-h (tonumber (or tile-h grid-size))
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
                 {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})
-        entities (icollect [_ {:px [x y] :__identifier id} (ipairs entities)]
-                   {:x x :y y : id })
+        entities (icollect [_ {:px [x y] :__identifier id
+                               : fieldInstances} (ipairs entities)]
+                   {:x x :y y : id
+                    :fields
+                    (collect [_ {:__identifier key :__value val} (ipairs fieldInstances)] (values key val))})
         ]
     {: imagetable : tiles : tile-w : tile-h
      : layer-type : entities
