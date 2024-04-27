@@ -14,6 +14,9 @@ clean:
 win-compile: source/**/*.fnl
 	powershell.exe "./support/build.ps1"
 
+win-love-compile: source/**/*.fnl
+	powershell.exe "./support/buildlove.ps1"
+
 win-build: win-compile
 	powershell.exe "pdc -k source test.pdx"
 	powershell.exe "cp source/*.ldtk test.pdx/"

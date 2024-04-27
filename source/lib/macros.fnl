@@ -8,15 +8,22 @@
            (print (.. ,inspected " => " ,val)))
        result#)))
 
+(fn div [a b]
+  (if _G.LOVE
+      `(math.floor (/ ,a ,b))
+      `(// ,a ,b)))
 
-;; https://github.com/bakpakin/Fennel/issues/421#issuecomment-1103070078
+;; PD version from https://github.com/bakpakin/Fennel/issues/421#issuecomment-1103070078
 (fn pd/import [lib]
-  `(lua ,(.. "import \"" lib "\"")))
+  (if _G.LOVE
+      `(require ,(.. "source.lib.playdate." (lib:gsub "%/" ".")))
+      `(lua ,(.. "import \"" lib "\""))))
+
 
 (fn defns [ns-name bindings & forms]
   (let [names (icollect [_ [t name & def] (ipairs forms)]
-                      (if (= t (sym :local)) name
-                          (= t (sym :fn)) name))
+                (if (= t (sym :local)) name
+                    (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
               (values (tostring name) name))]
 
@@ -30,5 +37,27 @@
 (fn round [val]
   `(math.floor (+ 0.5 ,val)))
 
-{: inspect : pd/import : defns : clamp : round }
+(fn love-hooks [bindings ...]
+  (let [code-load (defns :game bindings ...)]
+    `(let [game# ,code-load]
+       (tset love :load game#.load-hook)
+       (tset love :draw game#.update-hook))))
+
+(fn playdate-hooks [bindings ...]
+  (let [code-load (defns :game bindings ...)]
+    `(let [game# ,code-load]
+       (game#.load-hook)
+       (tset playdate :update game#.update-hook))))
+
+(fn pd/load [bindings ...]
+  (if _G.LOVE
+      (love-hooks bindings ...)
+      (playdate-hooks bindings ...)
+      ))
+
+(fn love/patch []
+  (if _G.LOVE
+      `(lua "playdate = {}")))
+
+{: inspect : pd/import : pd/load : love/patch : defns : div : clamp : round}
 
