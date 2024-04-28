@@ -41,13 +41,14 @@
   (let [code-load (defns :game bindings ...)]
     `(let [game# ,code-load]
        (tset love :load game#.load-hook)
-       (tset love :draw game#.update-hook))))
+       (tset love :update (fn [] (game#.update-hook) (playdate.love-update)))
+       (tset love :draw game#.draw-hook))))
 
 (fn playdate-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]
     `(let [game# ,code-load]
        (game#.load-hook)
-       (tset playdate :update game#.update-hook))))
+       (tset playdate :update (fn [] (game#.update-hook) (game#.draw-hook))))))
 
 (fn pd/load [bindings ...]
   (if _G.LOVE
@@ -57,7 +58,7 @@
 
 (fn love/patch []
   (if _G.LOVE
-      `(lua "playdate = {}")))
+      `(lua "playdate = {}; LOVE = true")))
 
 {: inspect : pd/import : pd/load : love/patch : defns : div : clamp : round}
 

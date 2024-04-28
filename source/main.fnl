@@ -24,5 +24,9 @@
    )
  (fn update-hook []
    (scene-manager:tick!)
-   (scene-manager:draw!)))
+   )
+ (fn draw-hook []
+   (scene-manager:draw!)
+   )
+ )
 

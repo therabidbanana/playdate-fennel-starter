@@ -13,6 +13,6 @@
     )
   (fn draw! [$]
     ;; ($.layer.tilemap:draw 0 0)
-    (gfx.drawTextInRect "Foobar test" 0 0 100 100)
+    (gfx.drawTextInRect "Foobar test" 20 20 100 100)
     )
   )

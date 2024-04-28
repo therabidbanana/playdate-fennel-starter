@@ -1,6 +1,8 @@
 (import-macros {: inspect : defns : pd/import} :source.lib.macros)
 
 (pd/import :CoreLibs/animation)
+(pd/import :CoreLibs/easing)
+(pd/import :CoreLibs/animator)
 
 (let [gfx playdate.graphics
       animation  gfx.animation

@@ -1,2 +1,2 @@
-;; This is set at the compiler level
+;; These flags are accessible only at compiler level
 (tset _G :LOVE true)

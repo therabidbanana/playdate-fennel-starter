@@ -17,6 +17,9 @@ win-compile: source/**/*.fnl
 win-love-compile: source/**/*.fnl
 	powershell.exe "./support/buildlove.ps1"
 
+win-love-launch: win-love-compile
+	powershell.exe "love source"
+
 win-build: win-compile
 	powershell.exe "pdc -k source test.pdx"
 	powershell.exe "cp source/*.ldtk test.pdx/"
