@@ -40,9 +40,9 @@
 (fn love-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]
     `(let [game# ,code-load]
-       (tset love :load game#.load-hook)
+       (tset love :load (fn [] (playdate.love-load) (game#.load-hook)))
        (tset love :update (fn [] (game#.update-hook) (playdate.love-update)))
-       (tset love :draw game#.draw-hook))))
+       (tset love :draw (fn [] (playdate.love-draw-start) (game#.draw-hook) (playdate.love-draw-end))))))
 
 (fn playdate-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]

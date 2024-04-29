@@ -13,6 +13,22 @@ Fennel is a Lua based lisp - https://fennel-lang.org/
 
 The Playdate is a tiny handheld game system that can be easily programmed in Lua.
 
+# Love2d Compat Mode
+
+**WORK IN PROGRESS**
+
+This framework allows compiling to a Love2d compatible lua file, with stubs for Playdate libraries and some wrappers to set up similar UI to playdate.
+
+This is very much a work in progress, most of the functions are still stubbed and the render is nothing alike.
+
+Features to add next:
+
+<!-- 1. Render in a similar aspect ratio -->
+2. Render text lib that works like playdate
+3. Input handlers (look at how Playbit does it)
+4. Render image
+5. Sprite handling
+
 # Build Process
 
 Assuming lua, fennel, pdc and playdate (simulator) are set up on your PATH, the Makefile should handle this with "make launch".
