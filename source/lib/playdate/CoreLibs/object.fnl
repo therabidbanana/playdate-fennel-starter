@@ -1,6 +1,27 @@
 ; Playdate object helpers and misc
 (import-macros {: defns} :source.lib.macros)
 
+(fn table.shallowcopy [orig]
+  (let [orig_type (type orig)]
+    (if (= orig_type "table")
+        (collect [key val (pairs orig)]
+          (values key val))
+        orig)))
+
+;; function shallowcopy(orig)
+;; local orig_type = type(orig)
+;; local copy
+;; if orig_type == 'table' then
+;;   copy = {}
+;;   for orig_key, orig_value in pairs(orig) do
+;;   copy[orig_key] = orig_value
+;;   end
+;; else -- number, string, boolean, etc
+;; copy = orig
+;; end
+;; return copy
+;; end
+
 (defns :basics []
   (local timestamp 0)
   (local canvas (love.graphics.newCanvas 400 240))
