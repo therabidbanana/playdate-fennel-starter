@@ -26,7 +26,6 @@
                     (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
               (values (tostring name) name))]
-
     `(let ,bindings
        ,forms
        ,map)))

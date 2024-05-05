@@ -1,26 +1,11 @@
 ; Playdate object helpers and misc
 (import-macros {: defns} :source.lib.macros)
 
-(fn table.shallowcopy [orig]
-  (let [orig_type (type orig)]
-    (if (= orig_type "table")
-        (collect [key val (pairs orig)]
-          (values key val))
-        orig)))
-
-;; function shallowcopy(orig)
-;; local orig_type = type(orig)
-;; local copy
-;; if orig_type == 'table' then
-;;   copy = {}
-;;   for orig_key, orig_value in pairs(orig) do
-;;   copy[orig_key] = orig_value
-;;   end
-;; else -- number, string, boolean, etc
-;; copy = orig
-;; end
-;; return copy
-;; end
+(fn table.shallowcopy [orig other]
+  (let [cloned (or other {})]
+    (each [key val (pairs orig)]
+      (tset cloned key val))
+    cloned))
 
 (defns :basics []
   (local timestamp 0)
@@ -208,6 +193,13 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (love.graphics.draw canvas 0 0 0 canvas-scale)
     )
 
+  (tset _G.playdate :geometry {})
+  (tset _G.playdate :geometry :rect
+        (defns :rect []
+          (fn insetBy [self] "TODO")
+          (fn new [x y width height]
+            {: x : y : width : height : insetBy})
+          ))
   (tset _G.playdate :drawFPS draw-fps)
   (tset _G.playdate :love-load love-load)
   (tset _G.playdate :love-update love-update)
