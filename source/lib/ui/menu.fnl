@@ -35,22 +35,26 @@
     (if (not keep-open?) ($ui:pop-component!))
     (if action (action)))
 
-  (fn render! [{: view : rect &as comp} $ui]
+  (fn render! [{: view : rect : on-draw &as comp} $ui]
+    (if on-draw (on-draw comp (?. view.options (view:getSelectedRow))))
     ;; needsDisplay note - sprite update sometimes wipes area
-    (view:drawInRect (rect:unpack)))
+    (view:drawInRect (rect:unpack))
+    )
 
   (fn tick! [{: view : anim-w : anim-h &as comp} $ui]
     (let [pressed? playdate.buttonJustPressed
           selected (?. view.options (view:getSelectedRow))]
       (if anim-h
-          (set comp.rect.height (anim-h:currentValue)))
+          (tset comp.rect :height (anim-h:currentValue)))
       (if anim-w
-          (set comp.rect.width (anim-w:currentValue)))
+          (tset comp.rect :width (anim-w:currentValue)))
+      (if (and anim-h (anim-h:ended)) (tset comp :anim-h nil))
+      (if (and anim-w (anim-w:ended)) (tset comp :anim-w nil))
       (if (pressed? playdate.kButtonDown) (view:selectNextRow)
           (pressed? playdate.kButtonUp) (view:selectPreviousRow)
           (pressed? playdate.kButtonA) (-handle-click selected $ui))))
 
-  (fn new! [proto $ui {: options : x : y : w : h : animate?}]
+  (fn new! [proto $ui {: options : x : y : w : h : animate? : on-draw}]
     (let [view (playdate.ui.gridview.new 0 10)
           rect (playdate.geometry.rect.new (or x 10) (or y 10)
                                            (if animate? 0 w w 180)
@@ -68,7 +72,7 @@
         (: :setCellPadding 0 0 5 4)
         (: :setCellSize 0 24)
         (: :setContentInset 8 8 12 11))
-      (table.shallowcopy proto {: view : rect : anim-w : anim-h}))
+      (table.shallowcopy proto {: view : rect : anim-w : anim-h : on-draw}))
     )
   )
 

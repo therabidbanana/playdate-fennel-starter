@@ -30,6 +30,15 @@
         )
     )
 
+  (fn getImage [{: current-anim &as self}]
+    (if (current-anim:isValid) (current-anim:image)
+        ;; Else move to next frame and draw
+        (do
+          (self:transition! current-anim.transition-to)
+          (self.current-anim:image))
+        )
+    )
+
   (fn new [{: image : delay : states : current-state }]
     (let [base-delay (or delay 150)
           current-state (or current-state (. states 1 :state))
@@ -42,5 +51,5 @@
                            (tset :paused true)
                            (tset :shouldLoop (if transition-to false true)))
                          (values state anim)))]
-      (: {: transition! : draw : animations} :transition! current-state)))
+      (: {: transition! : draw : animations : getImage} :transition! current-state)))
   )

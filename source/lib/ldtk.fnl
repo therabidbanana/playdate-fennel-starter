@@ -7,6 +7,7 @@
 
 (fn parse-layer [{:__tilesetRelPath imagetable
                   :__type layer-type
+                  :__identifier layer-id
                   :gridTiles tiles
                   :entityInstances entities
                   :__gridSize grid-size}
@@ -19,13 +20,15 @@
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
                 {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})
         entities (icollect [_ {:px [x y] :__identifier id
+                               : width : height
                                : fieldInstances} (ipairs entities)]
                    {:x x :y y : id
+                    : width : height
                     :fields
                     (collect [_ {:__identifier key :__value val} (ipairs fieldInstances)] (values key val))})
         ]
     {: imagetable : tiles : tile-w : tile-h
-     : layer-type : entities
+     : layer-type : entities : layer-id
      :map-w map-width :map-h map-height
      :grid-w (// map-width tile-w) :grid-h (// map-height tile-h)
      }))

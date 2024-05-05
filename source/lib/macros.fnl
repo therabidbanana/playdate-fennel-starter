@@ -24,6 +24,11 @@
        ,forms
        ,map)))
 
+(fn clamp [min x max]
+  `(math.max (math.min ,x ,max) ,min))
 
-{: inspect : pd/import : defns }
+(fn round [val]
+  `(math.floor (+ 0.5 ,val)))
+
+{: inspect : pd/import : defns : clamp : round }
 

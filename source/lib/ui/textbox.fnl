@@ -36,6 +36,8 @@
 
   (fn render! [{: view : rect : textRect &as comp} $ui]
     ;; needsDisplay note - sprite update sometimes wipes area
+    (gfx.pushContext)
+    (gfx.setDrawOffset 0 0)
     (if view.backgroundImage
         (view.backgroundImage:drawInRect rect)
         (do
@@ -52,7 +54,9 @@
           corner-y (- (+ rect.y rect.h) 15)]
       (gfx.drawTextInRect text textRect)
       (view.button:draw corner-x (+ corner-y (if view.blinker.on 1 0)))
-      ))
+      )
+    (gfx.popContext)
+    )
 
   (fn build-nametag [{: nametag }]
     (let [name-font (gfx.font.new :assets/fonts/Nontendo-Bold)
@@ -81,7 +85,7 @@
        playdate.easingFunctions.linear
        delay?)))
 
-  (fn tick! [{: view : anim-w : anim-h : anim-text : finished? &as comp} $ui]
+  (fn tick! [{: view : anim-w : anim-h : anim-text : finished? : action &as comp} $ui]
     (let [pressed? playdate.buttonJustPressed
           selected (?. view.options (view:getSelectedRow))
           lastPage (= (length view.pages) view.currentPageNum)
@@ -97,7 +101,9 @@
           (set comp.rect.width (anim-w:currentValue)))
       (if (and justPressedA finished?)
             (if lastPage
-                ($ui:pop-component!)
+                (do
+                  ($ui:pop-component!)
+                  (if action (action)))
                 (do
                   (tset comp :finished? false)
                   (tset comp.view :currentPageNum next-page)
@@ -108,7 +114,7 @@
           chars
           (tset comp.view :chars chars))))
 
-  (fn new! [proto $ui {: text : nametag : x : y : w : h : animate-in? : padding}]
+  (fn new! [proto $ui {: text : nametag : x : y : w : h : animate-in? : action : padding}]
     (let [frame (playdate.ui.gridview.new 0 10)
           padding-top (or padding 10)
           padding (or padding 8)
@@ -131,6 +137,6 @@
           finished? false
           nametag (if nametag (build-nametag {: nametag}))
           view {:backgroundImage bg : nametag : pages :currentPageNum 1 :chars 0 : blinker : button}]
-      (table.shallowcopy proto {: view : rect : textRect : anim-w : anim-h : anim-text : finished?}))
+      (table.shallowcopy proto {: view : rect : textRect : anim-w : anim-h : anim-text : action : finished?}))
     )
   )
