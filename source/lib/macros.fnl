@@ -36,6 +36,18 @@
 (fn round [val]
   `(math.floor (+ 0.5 ,val)))
 
+(fn defmodule [module bindings & forms]
+  (let [names (icollect [_ [t name & def] (ipairs forms)]
+                (if (= t (sym :local)) name
+                    (= t (sym :fn)) name))
+        map (collect [_ name (ipairs names)]
+              (values (tostring name) name))]
+    `(let ,bindings
+       ,forms
+       (each [k# v# (pairs ,map)]
+         (tset ,module k# v#))
+       ,module)))
+
 (fn love-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]
     `(let [game# ,code-load]
@@ -59,5 +71,6 @@
   (if _G.LOVE
       `(lua "playdate = {}; LOVE = true")))
 
-{: inspect : pd/import : pd/load : love/patch : defns : div : clamp : round}
+{: inspect : pd/import : pd/load : love/patch : defns
+ : div : clamp : round : defmodule }
 
