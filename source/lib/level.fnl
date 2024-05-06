@@ -24,4 +24,6 @@
                             (prepare-entity-layer l)
                             ))]
       {: tile-layers : entity-layers : w : h}))
+
+  (fn build-level [])
   )

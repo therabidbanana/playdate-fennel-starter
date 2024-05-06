@@ -1,3 +1,4 @@
 /*.pdx
 .DS_Store
 source/**.lua
+/.sentry-native/*
