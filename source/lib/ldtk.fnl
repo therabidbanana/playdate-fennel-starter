@@ -18,31 +18,35 @@
   enum-map)
 
 (fn find-details [{: defs}]
-  {:tilesets (icollect [_ v (ipairs (. defs :tilesets))]
+  {:tilesets (collect [_ v (ipairs (. defs :tilesets))]
                (do (tset v :enums (parse-tile-details v))
-                   v))
+                   (values (. v :uid) v)))
+   :layers (collect [_ v (ipairs (. defs :layers))]
+             (values (. v :uid) v))
+
    })
 
-(fn get-tile-enums [tile tileset-uid tilesets]
-  (?. (icollect [_ {: uid : enums} (ipairs tilesets)]
-        (if (= tileset-uid uid) (?. enums tile)))
-      1))
+(fn mutated-tile-enums [tileset-uid tilesets]
+  (case (?. tilesets tileset-uid :enums)
+    found-enums (collect [k v (pairs found-enums)]
+                  (values (+ 1 k) v))))
 
 (fn parse-layer [{:__tilesetRelPath imagetable
                   :__tilesetDefUid tileset-uid
                   :__type layer-type
-                  :__identifier layer-id
+                  :layerDefUid layer-id
                   :gridTiles tiles
                   :entityInstances entities
                   :__gridSize grid-size}
-                 {:w map-width :h map-height : tilesets}]
+                 {:w map-width :h map-height : tilesets : layers}]
   (let [(_ _ tile-w tile-h)   (if imagetable
                                   (string.find imagetable ".+%-table%-(%d+)%-(%d+)%..+")
                                   (values nil nil grid-size grid-size))
+        layer-def (?. layers layer-id)
         tile-w (tonumber (or tile-w grid-size))
         tile-h (tonumber (or tile-h grid-size))
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
-                {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1) :tile-enums (get-tile-enums t tileset-uid tilesets)})
+                {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})
         entities (icollect [_ {:px [x y] :__identifier id
                                : width : height
                                : fieldInstances} (ipairs entities)]
@@ -50,17 +54,20 @@
                     : width : height
                     :fields
                     (collect [_ {:__identifier key :__value val} (ipairs fieldInstances)] (values key val))})
+        tile-enums (mutated-tile-enums tileset-uid tilesets)
+        layer-enums (?. layer-def :uiFilterTags)
         ]
     {: imagetable : tiles : tile-w : tile-h
      : layer-type : entities : layer-id
+     : tile-enums : layer-enums
      :map-w map-width :map-h map-height
      :grid-w (// map-width tile-w) :grid-h (// map-height tile-h)
      }))
 
 (fn parse-level [{: layerInstances :pxWid w :pxHei h &as level}
-                 {: tilesets &as world}]
+                 {: tilesets : layers &as world}]
   (let [layers (icollect [_ layer (ipairs layerInstances)]
-                 (parse-layer layer {: w : h : tilesets}))]
+                 (parse-layer layer {: w : h : tilesets : layers}))]
     {: layers : w : h}))
 
 {: parse-level : find-level : find-details}

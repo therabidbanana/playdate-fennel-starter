@@ -10,7 +10,7 @@
   (local state {})
   (fn enter! [$]
     ($ui:open-menu! {:options [{:text "Foo" :action #($ui:open-textbox! {:text (gfx.getLocalizedText "textbox.test2") :nametag "Picarding"})}
-                               {:text "Bar [!]" :action #(scene-manager:select! :title)}
+                               {:text "Bar [!]" :action #(scene-manager:select! :level_0)}
                                {:text "Quux" :action #($ui:open-textbox! {:text (gfx.getLocalizedText "textbox.test2")})}
                                {:text "Qux" :keep-open? true}
                                {:text "Corge"}
@@ -25,7 +25,7 @@
     ;; (listview:drawInRect 180 20 200 200)
     (if ($ui:active?) ($ui:tick!)
         (let [pressed? playdate.buttonJustPressed]
-          (if (pressed? playdate.kButtonA) (scene-manager:select! :title)))
+          (if (pressed? playdate.kButtonA) (scene-manager:select! :level_0)))
         ))
   (fn draw! [{:state {: listview} &as $}]
     ($ui:render!)
