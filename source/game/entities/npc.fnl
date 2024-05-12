@@ -38,8 +38,8 @@
                                                 {:state :pace :start 4 :end 5 :delay 500 :transition-to :standing}
                                                 {:state :walking :start 4 :end 5}]})
           player (gfx.sprite.new)]
-      (player:setBounds x y 32 32)
       (player:setCenter 0 0)
+      (player:setBounds x y 32 32)
       (player:setCollideRect 6 1 18 30)
       (player:setGroups [3])
       (player:setCollidesWithGroups [1 4])

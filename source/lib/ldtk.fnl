@@ -50,8 +50,7 @@
         entities (icollect [_ {:px [x y] :__identifier id
                                : width : height
                                : fieldInstances} (ipairs entities)]
-                   {:x x :y y : id
-                    : width : height
+                   {: x : y : id : width : height
                     :fields
                     (collect [_ {:__identifier key :__value val} (ipairs fieldInstances)] (values key val))})
         tile-enums (mutated-tile-enums tileset-uid tilesets)
