@@ -148,7 +148,7 @@
 		}
 	], "entities": [
 		{
-			"identifier": "player_start",
+			"identifier": "player",
 			"uid": 4,
 			"tags": [],
 			"exportToToc": false,
@@ -221,7 +221,7 @@
 			]
 		},
 		{
-			"identifier": "test",
+			"identifier": "npc",
 			"uid": 7,
 			"tags": [],
 			"exportToToc": false,
@@ -352,7 +352,7 @@
 					"gridTiles": [],
 					"entityInstances": [
 						{
-							"__identifier": "test",
+							"__identifier": "npc",
 							"__grid": [13,3],
 							"__pivot": [0,0],
 							"__tags": [],
@@ -368,7 +368,7 @@
 							"__worldY": 48
 						},
 						{
-							"__identifier": "player_start",
+							"__identifier": "player",
 							"__grid": [5,4],
 							"__pivot": [0,0],
 							"__tags": [],

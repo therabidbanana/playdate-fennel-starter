@@ -51,6 +51,7 @@
   (fn add-entities! [{: tile-h : tile-w &as layer} entity-map]
     (icollect [_ {: id : width : height : x : y : fields} (ipairs layer.entities)]
       (let [entity-mod (?. entity-map id)
+            ;; NOTE: Skips unknown entities instead of error
             entity (if entity-mod
                        (entity-mod.new! x y {: fields : tile-h : tile-w : width : height}))]
         (if entity (entity:add))

@@ -2,14 +2,14 @@
 (import-macros {: deflevel} :source.lib.ldtk.macros)
 
 (deflevel :level_0
-  [{:player player-ent} (require :source.game.entities.core)
+  [entity-map (require :source.game.entities.core)
    ;; ldtk (require :source.lib.ldtk.loader)
    {: prepare-level!} (require :source.lib.level)
    pd playdate
    gfx pd.graphics]
 
   (fn enter! [$]
-    (let [entity-map {:player_start player-ent}
+    (let [
           ;; Option 1 - Loads at runtime
           ;; loaded (prepare-level! (ldtk.load-level {:level 0}) entity-map)
           ;; Option 2 - relies on deflevel compiling
