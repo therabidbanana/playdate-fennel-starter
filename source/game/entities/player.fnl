@@ -3,6 +3,7 @@
 (defns :player
   [pressed? playdate.buttonIsPressed
    gfx playdate.graphics
+   $ui (require :source.lib.ui)
    scene-manager (require :source.lib.scene-manager)
    anim (require :source.lib.animation)]
 
@@ -19,13 +20,29 @@
           dy (if (and (>= (+ y height) 240) (> dy 0)) 0
                  (and (<= y 0) (< dy 0)) 0
                  dy)
+          [facing-x facing-y] (case state.facing
+                                :left [(- x 8) (+ y (// height 2))]
+                                :right [(+ 40 x) (+ y (// height 2))]
+                                :up [(+ x (// width 2)) (- y 8)]
+                                _ [(+ x (// width 2)) (+ 8 height y)]) ;; 40 for height / width of sprite + 8
+          [facing-sprite & _] (gfx.sprite.querySpritesAtPoint facing-x facing-y)
           ]
       (tset self :state :dx dx)
       (tset self :state :dy dy)
+      (tset self :state :facing (if (> 0 dx) :left
+                                    (< 0 dx) :right
+                                    (> 0 dy) :up
+                                    (< 0 dy) :down
+                                    (or state.facing :down)))
+
       (tset self :state :walking? (not (and (= 0 dx) (= 0 dy))))
 
       (if (playdate.buttonJustPressed playdate.kButtonB)
-          (scene-manager:select! :menu)))
+          (scene-manager:select! :menu))
+      (if (and (playdate.buttonJustPressed playdate.kButtonA)
+               facing-sprite)
+          ($ui:open-textbox! {:text (gfx.getLocalizedText "textbox.test2")}))
+      )
     self)
 
   (fn update [{:state {: animation : dx : dy : walking?} &as self}]
