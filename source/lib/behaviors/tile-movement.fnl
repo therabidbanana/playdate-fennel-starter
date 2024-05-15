@@ -14,6 +14,7 @@
           ]
       (tset self.state :tile-x tile-x)
       (tset self.state :tile-y tile-y)
+      (tset self.state :facing state.facing)
       (tset state :move-x (- state.move-x dx))
       (tset state :move-y (- state.move-y dy))
       (if (and (= state.move-x 0) (= state.move-y 0))

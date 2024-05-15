@@ -2,18 +2,19 @@
 
 (defns :player
   [pressed? playdate.buttonIsPressed
+   justpressed? playdate.buttonJustPressed
    gfx playdate.graphics
    $ui (require :source.lib.ui)
+   tile (require :source.lib.behaviors.tile-movement)
    scene-manager (require :source.lib.scene-manager)
    anim (require :source.lib.animation)]
 
   (fn react! [{: state : height : x : y : width &as self}]
-    (let [dy (if (pressed? playdate.kButtonUp) (* -1 state.speed)
-                 (pressed? playdate.kButtonDown) (* 1 state.speed)
-                 0)
-          dx (if (pressed? playdate.kButtonLeft) (* -1 state.speed)
-                 (pressed? playdate.kButtonRight) (* 1 state.speed)
-                 0)
+    (if (justpressed? playdate.kButtonLeft) (self:->left!)
+        (justpressed? playdate.kButtonRight) (self:->right!)
+        (justpressed? playdate.kButtonUp) (self:->up!)
+        (justpressed? playdate.kButtonDown) (self:->down!))
+    (let [(dx dy) (self:tile-movement-react! state.speed)
           dx (if (and (>= (+ x width) 400) (> dx 0)) 0
                  (and (<= x 0) (< dx 0)) 0
                  dx)
@@ -29,12 +30,6 @@
           ]
       (tset self :state :dx dx)
       (tset self :state :dy dy)
-      (tset self :state :facing (if (> 0 dx) :left
-                                    (< 0 dx) :right
-                                    (> 0 dy) :up
-                                    (< 0 dy) :down
-                                    (or state.facing :down)))
-
       (tset self :state :walking? (not (and (= 0 dx) (= 0 dy))))
 
       (if (playdate.buttonJustPressed playdate.kButtonB)
@@ -61,7 +56,7 @@
   (fn collisionResponse [self other]
     (other:collisionResponse))
 
-  (fn new! [x y]
+  (fn new! [x y {: tile-w : tile-h}]
     (let [image (gfx.imagetable.new :assets/images/pineapple-walk)
           animation (anim.new {: image :states [{:state :standing :start 1 :end 1 :delay 2300 :transition-to :blinking}
                                                 {:state :blinking :start 2 :end 3 :delay 300 :transition-to :pace}
@@ -77,5 +72,6 @@
       (tset player :update update)
       (tset player :react! react!)
       (tset player :state {: animation :speed 2 :dx 0 :dy 0 :visible true})
+      (tile.add! player {: tile-h : tile-w})
       player)))
 
