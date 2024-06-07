@@ -51,7 +51,9 @@
     )
 
   (fn draw [{:state {: animation : dx : dy : visible : walking?} &as self} x y w h]
-    (animation:draw x y))
+    ;; (love.graphics.rectangle "fill" x y w h)
+    (animation:draw x y)
+    )
 
   (fn collisionResponse [self other]
     (other:collisionResponse))

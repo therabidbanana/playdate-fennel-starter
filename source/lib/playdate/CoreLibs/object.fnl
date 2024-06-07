@@ -179,8 +179,9 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (fn love-load []
     (love.window.setMode (* 400 canvas-scale) (* 240 canvas-scale))
     (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b)
-    (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b)
+    ;; (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b)
     (love.graphics.setShader shader)
+    ;; (shader:send "mode" 0)
     (canvas:setFilter "nearest" "nearest")
     )
   (fn love-update [] "TODO")
@@ -205,4 +206,20 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (tset _G.playdate :love-update love-update)
   (tset _G.playdate :love-draw-start love-draw-start)
   (tset _G.playdate :love-draw-end love-draw-end)
+
+  (tset _G.playdate :kButtonA "a")
+  (tset _G.playdate :kButtonB "s")
+  (tset _G.playdate :kButtonUp "up")
+  (tset _G.playdate :kButtonDown "down")
+  (tset _G.playdate :kButtonLeft "left")
+  (tset _G.playdate :kButtonRight "right")
+  (tset _G.playdate :buttonJustPressed
+        (fn button-just-pressed [key]
+          ;; TODO
+          false
+          ))
+
+  (tset _G.playdate :buttonIsPressed
+        (fn button-pressed [key]
+          (love.keyboard.isDown key)))
   )

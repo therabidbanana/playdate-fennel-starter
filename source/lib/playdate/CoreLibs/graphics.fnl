@@ -4,7 +4,9 @@
     (tset _G.playdate :graphics {}))
 
 (defmodule _G.playdate.graphics
-  [font (require :source.lib.playdate.CoreLibs.font)]
+  [font (require :source.lib.playdate.CoreLibs.font)
+   imagetable (require :source.lib.playdate.CoreLibs.imagetable)
+   tilemap (require :source.lib.playdate.CoreLibs.tilemap)]
   (local default-font (love.graphics.newFont "assets/fonts/AshevilleBM.fnt"))
   (local current-font default-font)
   (local COLOR_WHITE { :r (/ 176 255) :g (/ 174 255) :b (/ 167 255) })

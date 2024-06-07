@@ -1,12 +1,21 @@
 (fn inspect [val name]
   (let [inspected (or name (tostring val))]
-    `(let [result# ,val]
-       (if (= (type ,val) :table)
-           (do
-             (print (.. ,inspected " => "))
-             (printTable ,val))
-           (print (.. ,inspected " => " ,val)))
-       result#)))
+    (if _G.LOVE
+        `(let [result# ,val]
+           (if (= (type ,val) :table)
+               (do
+                 (print (.. ,inspected " => "))
+                 (printTable ,val)
+                 )
+               (print (.. ,inspected " => " ,val)))
+           result#)
+        `(let [result# ,val]
+           (if (= (type ,val) :table)
+               (do
+                 (print (.. ,inspected " => "))
+                 (printTable ,val))
+               (print (.. ,inspected " => " ,val)))
+           result#))))
 
 (fn div [a b]
   (if _G.LOVE
@@ -50,10 +59,26 @@
 
 (fn love-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]
-    `(let [game# ,code-load]
-       (tset love :load (fn [] (playdate.love-load) (game#.load-hook)))
-       (tset love :update (fn [] (game#.update-hook) (playdate.love-update)))
-       (tset love :draw (fn [] (playdate.love-draw-start) (game#.draw-hook) (playdate.love-draw-end))))))
+    `(do
+       (fn _G.printTable [tbl#]
+         (fn tostr# [val#]
+           (if (= (type val#) :table)
+               (.. "{"
+                   (table.concat (icollect [i# v# (pairs val#)]
+                                   (.. i# " = " (or (tostr# v#) "nil"))) "\n")
+                   "}")
+               (= (type val#) :function)
+               "(fn [])"
+               (= (type val#) :userdata)
+               "(love internal)"
+               val#
+               ))
+         (print (tostr# tbl#))
+         )
+       (let [game# ,code-load]
+         (tset love :load (fn [] (playdate.love-load) (game#.load-hook)))
+         (tset love :update (fn [] (game#.update-hook) (playdate.love-update)))
+         (tset love :draw (fn [] (playdate.love-draw-start) (game#.draw-hook) (playdate.love-draw-end)))))))
 
 (fn playdate-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]

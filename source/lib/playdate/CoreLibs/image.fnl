@@ -1,4 +1,4 @@
-(import-macros {: defns} :source.lib.macros)
+(import-macros {: defmodule} :source.lib.macros)
 
 (if (not (?. _G.playdate :graphics))
     (tset _G.playdate :graphics {}))
@@ -6,7 +6,7 @@
 (if (not (?. _G.playdate.graphics :image))
     (tset _G.playdate.graphics :image {}))
 
-(tset
- _G.playdate :graphics :image
- (defns :image []
-   (fn new [path] "TODO")))
+(defmodule
+ _G.playdate.graphics.image
+ []
+ (fn new [path] {}))

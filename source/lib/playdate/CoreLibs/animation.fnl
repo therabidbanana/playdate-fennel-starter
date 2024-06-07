@@ -13,7 +13,17 @@
     blinker
     (defns :blinker []
       (fn updateAll [] "TODO")
-      (fn new [] "TODO")
+      (fn new [] {})
+      ))
+   (local
+    loop
+    (defns :loop []
+      (fn draw [self x y] (self.image:drawImage self.frame x y))
+      (fn isValid [] true)
+      (fn new [delay image]
+        (let [frame 1]
+          { : frame : image : delay : isValid : draw }))
       ))
 
-   (fn updateTimers [] "TODO")))
+   (fn updateTimers [] "TODO")
+   (fn new [] {})))
