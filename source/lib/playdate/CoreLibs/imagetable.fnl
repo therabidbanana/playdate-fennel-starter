@@ -41,8 +41,8 @@
                 total-h (div atlas-height h)
                 quads []
                 ]
-            (for [y 0 total-h]
-              (for [x 0 total-w]
+            (for [y 0 (- total-h 1)]
+              (for [x 0 (- total-w 1)]
                 (table.insert quads (love.graphics.newQuad (* x w) (* y h)
                                                            w h
                                                            atlas-width atlas-height))))

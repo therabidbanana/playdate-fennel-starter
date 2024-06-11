@@ -10,6 +10,7 @@
 (love/patch)
 
 (pd/import :CoreLibs/object)
+(pd/import :CoreLibs/easing)
 (pd/import :CoreLibs/graphics)
 (pd/import :CoreLibs/sprites)
 (pd/import :CoreLibs/timer)

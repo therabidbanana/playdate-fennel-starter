@@ -69,16 +69,37 @@
                    "}")
                (= (type val#) :function)
                "(fn [])"
+               (= (type val#) :boolean)
+               (if val# "true" "false")
                (= (type val#) :userdata)
                "(love internal)"
                val#
                ))
          (print (tostr# tbl#))
          )
-       (let [game# ,code-load]
-         (tset love :load (fn [] (playdate.love-load) (game#.load-hook)))
-         (tset love :update (fn [] (game#.update-hook) (playdate.love-update)))
-         (tset love :draw (fn [] (playdate.love-draw-start) (game#.draw-hook) (playdate.love-draw-end)))))))
+       (let [game# ,code-load
+             fps# (/ 1 30)]
+         (tset love :load (fn []
+                            (tset love :next-time (love.timer.getTime))
+                            (tset love :fps-dt fps#)
+                            (playdate.love-load)
+                            (game#.load-hook)
+                            ))
+         (tset love :update (fn []
+                              (tset love :next-time (+ love.next-time love.fps-dt))
+                              (game#.update-hook)
+                              (playdate.love-update)))
+         (tset love :draw (fn []
+                            (let [cur-time# (love.timer.getTime)]
+                              (playdate.love-draw-start)
+                              (game#.draw-hook)
+                              (playdate.love-draw-end)
+                              (if (< love.next-time cur-time#)
+                                  (tset love :next-time cur-time#)
+                                  (love.timer.sleep (- love.next-time cur-time#))
+                                  )
+                              )
+                            ))))))
 
 (fn playdate-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]

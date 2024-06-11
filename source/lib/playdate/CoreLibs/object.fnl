@@ -10,7 +10,7 @@
 (defns :basics []
   (local timestamp 0)
   (local canvas (love.graphics.newCanvas 400 240))
-  (local canvas-scale 1)
+  (local canvas-scale 2)
   (local COLOR_WHITE { :r (/ 176 255) :g (/ 174 255) :b (/ 167 255) })
   (local COLOR_BLACK { :r (/ 49  255) :g (/ 47  255) :b (/ 40  255)  })
 
@@ -175,7 +175,12 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 }
 "))
 
-  (fn draw-fps [] "TODO")
+  (fn draw-fps []
+    (let [delta (love.timer.getAverageDelta)]
+    ;; -- Display the frame time in milliseconds for convenience.
+    ;; -- A lower frame time means more frames per second.
+      (love.graphics.print (string.format "%.1f fps" (/ 1000 (* 1000 delta))) 320 10))
+    )
   (fn love-load []
     (love.window.setMode (* 400 canvas-scale) (* 240 canvas-scale))
     (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b)
