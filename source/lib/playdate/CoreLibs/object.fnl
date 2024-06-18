@@ -8,6 +8,19 @@
     cloned))
 
 (defns :basics []
+  (local input-state
+         {:timer 0
+          :elapsed 0
+          :key-map
+          {:a "s" :b "a"
+           :up "up" :down "down" :left "left" :right "right"}
+          :buttons-held
+          {:a -1 :b -1 :up -1 :down -1 :left -1 :right -1}
+          :just-pressed
+          {:a false :b false :up false :down false :left false :right false}
+          :just-released
+          {:a false :b false :up false :down false :left false :right false}
+          })
   (local timestamp 0)
   (local canvas (love.graphics.newCanvas 400 240))
   (local canvas-scale 2)
@@ -187,10 +200,44 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     ;; (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b)
     (love.graphics.setShader shader)
     (tset _G.playdate.graphics :_shader shader)
+    (tset input-state :timer (math.floor (* 1000 (love.timer.getTime))))
     ;; (shader:send "mode" 0)
     (canvas:setFilter "nearest" "nearest")
     )
-  (fn love-update [] "TODO")
+
+
+  (fn updateInputTimers! [{: key-map : buttons-held : just-pressed : just-released : timer : elapsed &as input-state}]
+    (let [now     (math.floor (* (love.timer.getTime) 1000))
+          elapsed  (- now timer)]
+      (tset input-state :elapsed elapsed)
+      (tset input-state :timer now)
+      (each [key time-held (pairs buttons-held)]
+        (let [button-pressed? (love.keyboard.isDown (. key-map key))]
+          (if (and button-pressed? (< time-held 0))
+              (do (tset just-pressed key true)
+                  (tset just-released key false)
+                  (tset buttons-held key (+ (math.max time-held 0) elapsed)))
+              button-pressed?
+              (do
+                (tset just-pressed key false)
+                (tset just-released key false)
+                (tset buttons-held key (+ (math.max time-held 0) elapsed)))
+              (> time-held 0)
+              (do
+                (tset just-pressed key false)
+                (tset just-released key true)
+                (tset buttons-held key -1))
+              (do
+                (tset just-released key false)
+                (tset just-pressed key false)
+                (tset buttons-held key -1)
+                ))))
+      )
+    )
+
+  (fn love-update []
+    (updateInputTimers! input-state))
+
   (fn love-draw-start []
     (love.graphics.setCanvas canvas)
     (love.graphics.clear)
@@ -223,18 +270,20 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (tset _G.playdate :love-draw-end love-draw-end)
 
   (tset _G.playdate :kButtonA "a")
-  (tset _G.playdate :kButtonB "s")
+  (tset _G.playdate :kButtonB "b")
   (tset _G.playdate :kButtonUp "up")
   (tset _G.playdate :kButtonDown "down")
   (tset _G.playdate :kButtonLeft "left")
   (tset _G.playdate :kButtonRight "right")
+
   (tset _G.playdate :buttonJustPressed
         (fn button-just-pressed [key]
-          ;; TODO debounce
-          (love.keyboard.isDown key)
+          (. input-state :just-pressed key)
           ))
 
   (tset _G.playdate :buttonIsPressed
         (fn button-pressed [key]
-          (love.keyboard.isDown key)))
+          (let [time-held (. input-state :buttons-held key)]
+            (> time-held -1))
+          ))
   )

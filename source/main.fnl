@@ -21,7 +21,7 @@
  [{: scene-manager} (require :source.lib.core)]
  (fn load-hook []
    (scene-manager:load-scenes! (require :source.game.scenes))
-   (scene-manager:select! :menu)
+   (scene-manager:select! :title)
    )
  (fn update-hook []
    (scene-manager:tick!)
