@@ -1,9 +1,8 @@
-(import-macros {: defns} :source.lib.macros)
+(import-macros {: defmodule} :source.lib.macros)
 
 (if (not (?. _G.playdate :ui))
     (tset _G.playdate :ui {}))
 
-(tset
- _G.playdate :ui
- (defns :ui []
-   ))
+(defmodule _G.playdate.ui
+  [gridview (require :source.lib.playdate.CoreLibs.gridview)]
+  )

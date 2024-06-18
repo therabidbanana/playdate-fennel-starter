@@ -1,5 +1,5 @@
 ; Playdate object helpers and misc
-(import-macros {: defns} :source.lib.macros)
+(import-macros {: defns : div} :source.lib.macros)
 
 (fn table.shallowcopy [orig other]
   (let [cloned (or other {})]
@@ -186,6 +186,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b)
     ;; (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b)
     (love.graphics.setShader shader)
+    (tset _G.playdate.graphics :_shader shader)
     ;; (shader:send "mode" 0)
     (canvas:setFilter "nearest" "nearest")
     )
@@ -202,9 +203,18 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (tset _G.playdate :geometry {})
   (tset _G.playdate :geometry :rect
         (defns :rect []
-          (fn insetBy [self] "TODO")
+          (fn unpack [self]
+            (values self.x self.y self.width self.height))
+
+          (fn insetBy [self minus-x minus-y]
+            (let [minus-y (or minus-y minus-x)
+                  dx (div minus-x 2)
+                  dy (div minus-y 2)]
+              {:x (+ self.x dx) :y (+ self.y dy)
+               :height (- self.height dy) :width (- self.width dx)}))
           (fn new [x y width height]
-            {: x : y : width : height : insetBy})
+            {: x : y : width : height
+             : insetBy : unpack})
           ))
   (tset _G.playdate :drawFPS draw-fps)
   (tset _G.playdate :love-load love-load)
@@ -220,8 +230,8 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (tset _G.playdate :kButtonRight "right")
   (tset _G.playdate :buttonJustPressed
         (fn button-just-pressed [key]
-          ;; TODO
-          false
+          ;; TODO debounce
+          (love.keyboard.isDown key)
           ))
 
   (tset _G.playdate :buttonIsPressed
