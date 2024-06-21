@@ -196,12 +196,17 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     )
   (fn love-load []
     (love.window.setMode (* 400 canvas-scale) (* 240 canvas-scale))
-    (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b)
-    ;; (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b)
+    ;; (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
+    ;; (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b 1)
+    (love.graphics.setLineStyle "smooth")
+    (love.graphics.setLineWidth 1)
     (love.graphics.setShader shader)
     (tset _G.playdate.graphics :_shader shader)
+    (tset _G.playdate.graphics :_bg COLOR_WHITE)
+    (tset _G.playdate.graphics :_fg COLOR_BLACK)
+    (tset _G.playdate :_canvas canvas)
     (tset input-state :timer (math.floor (* 1000 (love.timer.getTime))))
-    ;; (shader:send "mode" 0)
+    (shader:send "mode" 0)
     (canvas:setFilter "nearest" "nearest")
     )
 
@@ -239,12 +244,17 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (updateInputTimers! input-state))
 
   (fn love-draw-start []
+    (love.graphics.clear COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
     (love.graphics.setCanvas canvas)
-    (love.graphics.clear)
+    ;; TODO - do we always want this?
+    (love.graphics.clear COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
     )
   (fn love-draw-end []
     (love.graphics.setCanvas)
+    (love.graphics.setShader)
     (love.graphics.draw canvas 0 0 0 canvas-scale)
+    (love.graphics.setShader shader)
+    (tset _G.playdate :_last-image (canvas:newImageData))
     )
 
   (tset _G.playdate :geometry {})
@@ -256,11 +266,18 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
           (fn insetBy [self minus-x minus-y]
             (let [minus-y (or minus-y minus-x)
                   dx (div minus-x 2)
-                  dy (div minus-y 2)]
-              {:x (+ self.x dx) :y (+ self.y dy)
-               :height (- self.height dy) :width (- self.width dx)}))
+                  dy (div minus-y 2)
+                  new-x (+ self.x dx)
+                  new-y (+ self.y dy)
+                  new-height (- self.height dy)
+                  new-width (- self.width dx)]
+              ;; TODO: maybe way to call new on module direct?
+              (_G.playdate.geometry.rect.new new-x new-y new-width new-height)
+              ))
+
           (fn new [x y width height]
             {: x : y : width : height
+             :h height :w width
              : insetBy : unpack})
           ))
   (tset _G.playdate :drawFPS draw-fps)

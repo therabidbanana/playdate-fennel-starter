@@ -9,4 +9,14 @@
 (defmodule
  _G.playdate.graphics.image
  []
- (fn new [path] {}))
+ (fn draw [self x y]
+   (love.graphics.draw self.image x y)
+   )
+
+ (fn new [path-or-data]
+   (let [path-or-data (if (= (type path-or-data) :string)
+                          (.. path-or-data :.png)
+                          path-or-data)
+         image (love.graphics.newImage path-or-data)]
+     {: image : draw})
+   ))

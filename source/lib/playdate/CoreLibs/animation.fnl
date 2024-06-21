@@ -13,8 +13,10 @@
    (local
     blinker
     (defns :blinker []
+      (fn start [] "TODO")
       (fn updateAll [] "TODO")
-      (fn new [] {})
+      (fn new [] {: start}
+        )
       ))
    (local
     loop

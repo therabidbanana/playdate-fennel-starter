@@ -52,6 +52,7 @@
          inset self.inset
          padding self.padding
          ]
+     ;; (_G.playdate.graphics.pushContext)
      (for [row 1 self.rows]
        ;; section 1, column 1...
        (let [column 1
@@ -63,7 +64,9 @@
          (self:drawCell section row column (and (= row self.selected-row)
                                                 (= column self.selected-col))
                         cell-x cell-y cell-w cell-h))
-       ))
+       )
+     ;; (_G.playdate.graphics.popContext)
+     )
    )
 
 

@@ -25,9 +25,13 @@ Features to add next:
 
 <!-- 1. Render in a similar aspect ratio -->
 2. Render text lib that works like playdate
-3. Input handlers (look at how Playbit does it)
-4. Render image
-5. Sprite handling
+<!-- 3. Input handlers (look at how Playbit does it) -->
+<!-- 4. Render image -->
+<!-- 5. Sprite handling -->
+6. Sprite collision support
+7. Nine slice support
+8. scrolling in gridview
+9. graphics context support (use in gridview)
 
 # Build Process
 

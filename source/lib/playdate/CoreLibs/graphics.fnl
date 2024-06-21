@@ -1,4 +1,4 @@
-(import-macros {: defmodule} :source.lib.macros)
+(import-macros {: defmodule : inspect} :source.lib.macros)
 
 (if (not (?. _G.playdate :graphics))
     (tset _G.playdate :graphics {}))
@@ -7,6 +7,7 @@
   [font (require :source.lib.playdate.CoreLibs.font)
    imagetable (require :source.lib.playdate.CoreLibs.imagetable)
    tilemap (require :source.lib.playdate.CoreLibs.tilemap)
+   image (require :source.lib.playdate.CoreLibs.image)
    ]
   (local default-font (love.graphics.newFont "assets/fonts/AshevilleBM.fnt"))
   (local current-font default-font)
@@ -18,43 +19,115 @@
   (local kDrawModeFillWhite "fillwhite")
   (local kDrawModeFillBlack "fillblack")
   (local _mode kDrawModeCopy)
+  (local strings {})
 
-  (fn getDisplayImage [] "TODO")
-  (fn clear [] "TODO")
+  (fn getDisplayImage []
+    (image.new _G.playdate._last-image)
+    )
+
+  (fn -read-strings [strings lang]
+    (let [file (love.filesystem.read (.. lang ".strings"))]
+      (tset strings lang {})
+      (each [k v (string.gmatch file "\"([^\"]+)\"%s*=%s*\"([^\"]+)\"")]
+        (tset strings lang k v))
+      ))
+
+  (fn getLocalizedText [key lang]
+    (let [lang (or lang "en")]
+      (if (?. strings lang)
+          (?. strings lang key)
+          (do (-read-strings strings lang)
+              (?. strings lang key))))
+    )
+
+  (fn clear [] (love.graphics.clear))
+  (local graphics-stack [])
+
+  (fn pushContext [image?]
+    (let [curr-context {:mode  _mode}]
+      ;; TODO - handle set canvas
+      (table.insert graphics-stack curr-context)
+      (love.graphics.push :all)
+      ))
+
+  (fn popContext [image?]
+    (let [prev-context (table.remove graphics-stack)]
+      (if prev-context
+          (do
+            (love.graphics.pop)
+            (_shader:send "mode" prev-context.mode)))
+      ))
+
   (fn getTextSizeForMaxWidth [text max-w]
     (let [curr-font (love.graphics.getFont)
           (w lines) (curr-font:getWrap text max-w)]
-      (values w (* (curr-font:getLineHeight) (length lines)))
+      (values w (* (curr-font:getHeight) (length lines)))
       ))
-  (fn drawTextInRect [text x y w h]
+  (fn drawTextInRect [text & rest]
     (let [curr-font (love.graphics.getFont)]
-      (love.graphics.printf text x y w))
+      (case rest
+        [{: x : y : w &as rect}] (love.graphics.printf text x y w)
+        [x y w h] (love.graphics.printf text x y w)
+        )
+      ;; (love.graphics.printf text x y w)
+      )
     )
+
   (fn setColor [color]
-    (love.graphics.setColor color.r color.g color.b)
+    (tset _G.playdate.graphics :_fg color)
+    ;; (love.graphics.setColor color.r color.g color.b (?. color :a))
     )
-  (fn fillRoundRect [x y width height radius]
-    (if (= nil width)
-        (love.graphics.rectangle "fill" x.x x.y x.width x.height radius radius)
-        (love.graphics.rectangle "fill" x y width height radius radius)))
+
+  (fn setBackgroundColor [color]
+    (tset _G.playdate.graphics :_bg color)
+    ;; (love.graphics.setColor color.r color.g color.b (?. color :a))
+    )
+
+  (fn fillRoundRect [& rest]
+    (do
+      (love.graphics.push :all)
+      (love.graphics.setColor _G.playdate.graphics._fg.r
+                              _G.playdate.graphics._fg.g
+                              _G.playdate.graphics._fg.b)
+      (case rest
+        [x y width height radius]
+        (love.graphics.rectangle "fill" x y width height radius radius)
+        [{: x : y : width : height} radius]
+        (love.graphics.rectangle "fill" x y width height radius radius)
+        )
+      (love.graphics.pop)
+      )
+    )
+
   (fn setLineWidth [width] "todo")
-  (fn drawRoundRect [rect radius]
-    (if (= nil width)
-        (love.graphics.rectangle "line" x.x x.y x.width x.height radius radius)
-        (love.graphics.rectangle "line" x y width height radius radius))
-    "todo")
+
+  (fn drawRoundRect [& rest]
+    (love.graphics.push :all)
+    (love.graphics.setColor _G.playdate.graphics._fg.r
+                            _G.playdate.graphics._fg.g
+                            _G.playdate.graphics._fg.b)
+    (case rest
+      [x y width height radius]
+      (love.graphics.rectangle "line" x y width height radius radius)
+      [{: x : y : width : height} radius]
+      (love.graphics.rectangle "line" x y width height radius radius)
+      )
+    (love.graphics.pop))
+
   (fn lockFocus [canvas] "todo")
   ;; (name-font:drawText nametag double padding)
   (fn unlockFocus [] "TODO")
   (fn setImageDrawMode [mode]
     (let [_shader (love.graphics.getShader)]
-      (tset _G.playdate.graphics :_mode mode)
-      (if (= kDrawModeCopy mode)
-          (_shader:send "mode" 0)
-          (= kDrawModeFillWhite mode)
-          (_shader:send "mode" 1)
-          (= kDrawModeFillBlack mode)
-          (_shader:send "mode" 2))))
+      (if _shader
+          (do
+            (tset _G.playdate.graphics :_mode mode)
+            (if (= kDrawModeCopy mode)
+                (_shader:send "mode" 0)
+                (= kDrawModeFillWhite mode)
+                (_shader:send "mode" 1)
+                (= kDrawModeFillBlack mode)
+                (_shader:send "mode" 2))))))
 
   (love.graphics.setFont default-font)
   )

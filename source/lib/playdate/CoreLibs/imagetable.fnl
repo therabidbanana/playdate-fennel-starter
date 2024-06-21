@@ -11,11 +11,19 @@
 
   (fn getImage [{: quads : atlas} n]
     {:draw (fn [x y]
-             (love.graphics.draw atlas (?. quads n) x y))}
+             ;; (love.graphics.push :all)
+             ;; (love.graphics.setColor 1 1 1 1)
+             (love.graphics.draw atlas (?. quads n) x y)
+             ;; (love.graphics.pop)
+             )}
     )
 
   (fn drawImage [{: quads : atlas} n x y]
-    (love.graphics.draw atlas (?. quads n) x y))
+    ;; (love.graphics.push :all)
+    ;; (love.graphics.setColor 1 1 1 1)
+    (love.graphics.draw atlas (?. quads n) x y)
+    ;; (love.graphics.pop)
+    )
 
   (fn new [path]
     ;; TODO: windows compat?

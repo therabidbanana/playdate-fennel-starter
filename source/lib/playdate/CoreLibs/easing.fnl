@@ -17,8 +17,8 @@
  _G.playdate :easingFunctions
  (defns :easingFunctions []
    (fn outCubic [t b c d]
-     (let [t (/ t (- d 1))]
-       (+ (* c (+ (^ t 3) 1)) b))
+     (let [t (/ t d)]
+       (+ (* c (- 1 (^ (- 1 t) 3))) b))
      )
    (local easeOutCubic outCubic)
 
