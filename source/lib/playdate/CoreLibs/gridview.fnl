@@ -50,11 +50,13 @@
          height self.cell-h
          width cell-width]
      (values
-      (+ inset.left (* width (- column 1))
+      (+ ;;inset.left
+         (* width (- column 1))
          (* padding.left (- column 1))
          (* padding.right (- column 1))
          )
-      (+ inset.top (* height (- row 1))
+      (+ ;;inset.top
+         (* height (- row 1))
          (* padding.top (- row 1))
          (* padding.bottom (- row 1))
          )
@@ -63,13 +65,13 @@
  (fn -relativeSize [self full-width]
    (let [width (if (<= self.cell-w 0)
                    full-width
-                   (+ self.inset.left self.inset.right
+                   (+ 0
+                      ;;self.inset.left self.inset.right
                       (* self.columns (+ self.padding.left self.padding.right self.cell-w))))
          height self.cell-h]
      (values
-      ;; (+ self.inset.left self.inset.right (* ))
       (+ 0 width)
-      (+ self.inset.top self.inset.bottom
+      (+ ;;self.inset.top self.inset.bottom
          (* height self.rows)
          (* self.padding.top self.rows)
          (* self.padding.bottom self.rows)
@@ -85,13 +87,19 @@
                    self.cell-w)
          cell-h self.cell-h
          (canvas-w canvas-h) (-relativeSize self width)
+         outer  (love.graphics.newCanvas width height)
          canvas (love.graphics.newCanvas canvas-w canvas-h)
-         max-scroll-x (- canvas-w width)
-         max-scroll-y (- canvas-h height)
-         scroll-x (math.max (math.min (self.scroll-x:currentValue) max-scroll-x) inset.left)
-         scroll-y (math.max (math.min (self.scroll-y:currentValue) max-scroll-y) inset.top)
+         viewport-w (- width inset.left inset.right)
+         viewport-h (- height inset.top inset.bottom)
+         max-scroll-x (- canvas-w viewport-w)
+         max-scroll-y (- canvas-h viewport-h)
+         scroll-x (math.max (math.min (self.scroll-x:currentValue) max-scroll-x) 0)
+         scroll-y (math.max (math.min (self.scroll-y:currentValue) max-scroll-y) 0)
          quad   (love.graphics.newQuad (math.floor scroll-x) (math.floor scroll-y)
-                                       width height canvas-w canvas-h)]
+                                       viewport-w viewport-h
+                                       canvas-w canvas-h)
+         outerquad (love.graphics.newQuad 0 0 width height width height)
+         ]
      (if self.scroll-target
          (let [new-scroll-x (- (* (+ padding.left cell-w padding.right) (- self.scroll-target.col 1))
                                (if self.scroll-target.center (div (- width cell-w padding.left padding.right) 2) 0))
@@ -102,14 +110,13 @@
            )
          )
      (love.graphics.push :all)
+     (love.graphics.setCanvas outer)
+     (love.graphics.push :all)
      (love.graphics.setCanvas canvas)
      (for [row 1 self.rows]
        ;; section 1, column 1...
        (let [column 1
              (cell-x cell-y) (-relativeCoords self cell-w row column)
-             ;; TODO: handle scroll
-             ;; cell-x (+ inset.left (+ x (* width (- column 1))))
-             ;; cell-y (+ inset.top (+ y (* height (- row 1))))
              ]
          (_G.playdate.graphics.pushContext)
          (self:drawCell section row column
@@ -120,7 +127,11 @@
          )
        )
      (love.graphics.pop)
-     (love.graphics.draw canvas quad x y)
+     (if self.backgroundImage
+         (self.backgroundImage:drawInRect 0 0 width height))
+     (love.graphics.draw canvas quad inset.left inset.top)
+     (love.graphics.pop)
+     (love.graphics.draw outer outerquad x y)
      )
    )
 

@@ -45,9 +45,9 @@
     (let [pressed? playdate.buttonJustPressed
           selected (?. view.options (view:getSelectedRow))]
       (if anim-h
-          (tset comp.rect :height (anim-h:currentValue)))
+          (tset comp.rect :height (math.floor (anim-h:currentValue))))
       (if anim-w
-          (tset comp.rect :width (anim-w:currentValue)))
+          (tset comp.rect :width (math.floor (anim-w:currentValue))))
       (if (and anim-h (anim-h:ended)) (tset comp :anim-h nil))
       (if (and anim-w (anim-w:ended)) (tset comp :anim-w nil))
       (if (pressed? playdate.kButtonDown) (view:selectNextRow)
