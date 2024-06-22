@@ -32,6 +32,8 @@ Features to add next:
 7. Nine slice support
 8. scrolling in gridview
 9. graphics context support (use in gridview)
+10. blinker support
+11. padding fix for gridview
 
 # Build Process
 

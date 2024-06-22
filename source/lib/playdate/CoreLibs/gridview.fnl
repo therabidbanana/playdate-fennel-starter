@@ -8,7 +8,7 @@
     (tset _G.playdate.ui :gridview {}))
 
 (defmodule _G.playdate.ui.gridview
- []
+  [animator (require :source.lib.playdate.CoreLibs.animator)]
  ;; TODO: support multiple sections
 
  (fn setNumberOfRows [self num]
@@ -18,8 +18,8 @@
    (tset self :cols num))
 
  (fn setCellSize [self width height]
-   (tset self :grid-w width)
-   (tset self :grid-h height)
+   (tset self :cell-w width)
+   (tset self :cell-h height)
    )
 
  (fn setContentInset [self left right top bottom]
@@ -42,30 +42,72 @@
      (tset self :padding :right right)
      ))
 
+ ;; TODO: naive approach without sections
+ (fn -relativeCoords [self cell-width row column section]
+   (let [section 1
+         inset self.inset
+         padding self.padding
+         height self.cell-h
+         width cell-width]
+     (values
+      (+ inset.left (* width (- column 1))
+         (* padding.left (- column 1))
+         (* padding.right (- column 1))
+         )
+      (+ inset.top (* height (- row 1))
+         (* padding.top (- row 1))
+         (* padding.bottom (- row 1))
+         )
+      )))
+
+ (fn -relativeSize [self full-width]
+   (let [width (if (<= self.cell-w 0)
+                   full-width
+                   (+ self.inset.left self.inset.right
+                      (* self.columns (+ self.padding.left self.padding.right self.cell-w))))
+         height self.cell-h]
+     (values
+      ;; (+ self.inset.left self.inset.right (* ))
+      (+ 0 width)
+      (+ self.inset.top self.inset.bottom
+         (* height self.rows)
+         (* self.padding.top self.rows)
+         (* self.padding.bottom self.rows)
+         ))))
+
  (fn drawInRect [self x y width height]
    ;; (tset self :cols num)
    (let [section 1
-         width (if (<= self.grid-w 0)
-                   width
-                   self.grid-w)
-         height self.grid-h
          inset self.inset
          padding self.padding
-         ]
-     ;; (_G.playdate.graphics.pushContext)
+         cell-w (if (<= self.cell-w 0)
+                   (- width inset.left inset.right padding.left padding.right)
+                   self.cell-w)
+         cell-h self.cell-h
+         (canvas-w canvas-h) (-relativeSize self width)
+         canvas (love.graphics.newCanvas canvas-w canvas-h)
+         quad   (love.graphics.newQuad (self.scroll-x:currentValue) (self.scroll-y:currentValue)
+                                       width height canvas-w canvas-h)]
+     (love.graphics.push :all)
+     (love.graphics.setCanvas canvas)
      (for [row 1 self.rows]
        ;; section 1, column 1...
        (let [column 1
+             (cell-x cell-y) (-relativeCoords self cell-w row column)
              ;; TODO: handle scroll
-             cell-x (+ inset.left (+ x (* width (- column 1))))
-             cell-y (+ inset.top (+ y (* height (- row 1))))
-             cell-h (+ height padding.top padding.bottom)
-             cell-w (+ width padding.left padding.right)]
-         (self:drawCell section row column (and (= row self.selected-row)
-                                                (= column self.selected-col))
-                        cell-x cell-y cell-w cell-h))
+             ;; cell-x (+ inset.left (+ x (* width (- column 1))))
+             ;; cell-y (+ inset.top (+ y (* height (- row 1))))
+             ]
+         (_G.playdate.graphics.pushContext)
+         (self:drawCell section row column
+                        (and (= row self.selected-row) (= column self.selected-col))
+                        (+ cell-x padding.left) (+ cell-y padding.top)
+                        cell-w cell-h)
+         (_G.playdate.graphics.popContext)
+         )
        )
-     ;; (_G.playdate.graphics.popContext)
+     (love.graphics.pop)
+     (love.graphics.draw canvas quad x y)
      )
    )
 
@@ -73,31 +115,53 @@
  (fn getSelectedRow [self section]
    (?. self :selected-row))
 
- (fn selectNextRow [self wrap]
-   ;; TODO: wrap
-   (let [selected (?. self :selected-row)]
+ ;; (fn scrollToCell [self section row column animated?]
+ ;;   (let [curr-x (self.scroll-x:currentValue)
+ ;;         curr-y (self.scroll-y:currentValue)
+ ;;         (canvas-w canvas-h) (-relativeSize self self.cell-w)
+ ;;         (target-x target-y) (-relativeCoords self self.cell-w row column)
+ ;;         animated? (if (= nil animated?)
+ ;;                       true
+ ;;                       animated?)]
+ ;;     (if animated?
+ ;;         )
+ ;;     ))
+
+ (fn selectNextRow [self wrap scroll]
+   (let [selected (?. self :selected-row)
+         scroll (if (= nil scroll)
+                    true
+                    scroll)]
      (if (>= self.rows (+ 1 selected))
-         (tset self :selected-row (+ 1 selected)))))
+         (do
+           (tset self :selected-row (+ 1 selected))
+           ;; (if scroll (tset self :scroll-y (animator.new 300 (self.scroll-y:currentValue) (+ (self.scroll-y:currentValue) 30)
+           ;;                                               playdate.easingFunctions.easeOutCubic)))
+           )
+         (and wrap (> (+ 1 selected) self.rows))
+         (tset self :selected-row 1))
+     ))
 
  (fn selectPreviousRow [self wrap]
+   ;; TODO: scrolling
    ;; TODO: wrap
    (let [selected (?. self :selected-row)]
      (if (>= (- selected 1) 1)
          (tset self :selected-row (- selected 1)))))
 
  (fn new [cell-width cell-height]
-   (let [grid-w cell-width
-         grid-h cell-height
+   (let [cell-w cell-width
+         cell-h cell-height
          needsDisplay true
          padding {:top 0 :left 0 :bottom 0 :right 0}
          inset {:top 0 :left 0 :bottom 0 :right 0}
-         scroll-x 0
-         scroll-y 0
+         scroll-x (animator.new 0 0 0 playdate.easingFunctions.easeOutCubic)
+         scroll-y (animator.new 0 0 0 playdate.easingFunctions.easeOutCubic)
          selected-row 1
          selected-col 1
          rows 1
          cols 1]
-     {: rows : cols : grid-w : grid-h
+     {: rows : cols : cell-w : cell-h
       : scroll-x : scroll-y : selected-row : selected-col
       : inset : padding
       : needsDisplay

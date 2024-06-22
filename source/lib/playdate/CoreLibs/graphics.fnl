@@ -25,6 +25,18 @@
     (image.new _G.playdate._last-image)
     )
 
+  (fn setImageDrawMode [mode]
+    (let [_shader (love.graphics.getShader)]
+      (if _shader
+          (do
+            (tset _G.playdate.graphics :_mode mode)
+            (if (= kDrawModeCopy mode)
+                (_shader:send "mode" 0)
+                (= kDrawModeFillWhite mode)
+                (_shader:send "mode" 1)
+                (= kDrawModeFillBlack mode)
+                (_shader:send "mode" 2))))))
+
   (fn -read-strings [strings lang]
     (let [file (love.filesystem.read (.. lang ".strings"))]
       (tset strings lang {})
@@ -50,12 +62,14 @@
       (love.graphics.push :all)
       ))
 
-  (fn popContext [image?]
-    (let [prev-context (table.remove graphics-stack)]
+  (fn popContext []
+    (let [prev-context (table.remove graphics-stack)
+          _shader (love.graphics.getShader)]
       (if prev-context
           (do
             (love.graphics.pop)
-            (_shader:send "mode" prev-context.mode)))
+            (setImageDrawMode prev-context.mode)
+            ))
       ))
 
   (fn getTextSizeForMaxWidth [text max-w]
@@ -117,17 +131,9 @@
   (fn lockFocus [canvas] "todo")
   ;; (name-font:drawText nametag double padding)
   (fn unlockFocus [] "TODO")
-  (fn setImageDrawMode [mode]
-    (let [_shader (love.graphics.getShader)]
-      (if _shader
-          (do
-            (tset _G.playdate.graphics :_mode mode)
-            (if (= kDrawModeCopy mode)
-                (_shader:send "mode" 0)
-                (= kDrawModeFillWhite mode)
-                (_shader:send "mode" 1)
-                (= kDrawModeFillBlack mode)
-                (_shader:send "mode" 2))))))
+  
+  (fn getImageDrawMode [mode]
+    _G.playdate.graphics._mode)
 
   (love.graphics.setFont default-font)
   )
