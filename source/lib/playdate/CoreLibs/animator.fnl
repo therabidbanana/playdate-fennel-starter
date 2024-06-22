@@ -1,4 +1,4 @@
-(import-macros {: defmodule} :source.lib.macros)
+(import-macros {: inspect : defmodule} :source.lib.macros)
 
 (if (not (?. _G.playdate :graphics))
     (tset _G.playdate :graphics {}))
@@ -10,11 +10,14 @@
   [timer _G.playdate.timer]
 
   (fn currentValue [self]
-    self.timer.value)
+    (if self.timer.expired
+        self.timer.endValue
+        self.timer.value))
 
   (fn ended [self]
     self.timer.expired)
 
+  ;; TODO: delayed
   (fn new [duration start end easing delayed]
     (let [timer (timer.new duration start end easing)
           __state {}

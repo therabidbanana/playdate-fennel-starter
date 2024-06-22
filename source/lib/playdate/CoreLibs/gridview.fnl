@@ -1,4 +1,4 @@
-(import-macros {: defmodule} :source.lib.macros)
+(import-macros {: defmodule : inspect} :source.lib.macros)
 
 
 (if (not (?. _G.playdate :ui))
@@ -86,8 +86,19 @@
          cell-h self.cell-h
          (canvas-w canvas-h) (-relativeSize self width)
          canvas (love.graphics.newCanvas canvas-w canvas-h)
-         quad   (love.graphics.newQuad (self.scroll-x:currentValue) (self.scroll-y:currentValue)
+         max-scroll-x (- canvas-w width)
+         max-scroll-y (- canvas-h height)
+         scroll-x (math.max (math.min (self.scroll-x:currentValue) max-scroll-x) inset.left)
+         scroll-y (math.max (math.min (self.scroll-y:currentValue) max-scroll-y) inset.top)
+         quad   (love.graphics.newQuad (math.floor scroll-x) (math.floor scroll-y)
                                        width height canvas-w canvas-h)]
+     (if self.scroll-target
+         (let [new-scroll-x (* (+ padding.left cell-w padding.right) (- self.scroll-target.col 1))
+               new-scroll-y (* (+ padding.top cell-h padding.bottom) (- self.scroll-target.row 1))]
+           (tset self :scroll-target nil)
+           (self:setScrollPosition new-scroll-x new-scroll-y)
+           )
+         )
      (love.graphics.push :all)
      (love.graphics.setCanvas canvas)
      (for [row 1 self.rows]
@@ -115,17 +126,18 @@
  (fn getSelectedRow [self section]
    (?. self :selected-row))
 
- ;; (fn scrollToCell [self section row column animated?]
- ;;   (let [curr-x (self.scroll-x:currentValue)
- ;;         curr-y (self.scroll-y:currentValue)
- ;;         (canvas-w canvas-h) (-relativeSize self self.cell-w)
- ;;         (target-x target-y) (-relativeCoords self self.cell-w row column)
- ;;         animated? (if (= nil animated?)
- ;;                       true
- ;;                       animated?)]
- ;;     (if animated?
- ;;         )
- ;;     ))
+ (fn setScrollPosition [self x y animated?]
+   (let [curr-x (self.scroll-x:currentValue)
+         curr-y (self.scroll-y:currentValue)
+         easing self.scrollEasingFunction
+         duration (if (= nil animated?)
+                      self.scrollDuration
+                      animated?
+                      self.scrollDuration
+                      1)]
+     (tset self :scroll-x (animator.new duration curr-x x easing))
+     (tset self :scroll-y (animator.new duration curr-y y easing))
+     ))
 
  (fn selectNextRow [self wrap scroll]
    (let [selected (?. self :selected-row)
@@ -133,21 +145,22 @@
                     true
                     scroll)]
      (if (>= self.rows (+ 1 selected))
-         (do
-           (tset self :selected-row (+ 1 selected))
-           ;; (if scroll (tset self :scroll-y (animator.new 300 (self.scroll-y:currentValue) (+ (self.scroll-y:currentValue) 30)
-           ;;                                               playdate.easingFunctions.easeOutCubic)))
-           )
+         (tset self :selected-row (+ 1 selected))
          (and wrap (> (+ 1 selected) self.rows))
          (tset self :selected-row 1))
+     (if scroll (tset self :scroll-target {:row self.selected-row :col self.selected-col}))
      ))
 
- (fn selectPreviousRow [self wrap]
-   ;; TODO: scrolling
-   ;; TODO: wrap
-   (let [selected (?. self :selected-row)]
+ (fn selectPreviousRow [self wrap scroll]
+   (let [selected (?. self :selected-row)
+         scroll (if (= nil scroll)
+                    true
+                    scroll)]
      (if (>= (- selected 1) 1)
-         (tset self :selected-row (- selected 1)))))
+         (tset self :selected-row (- selected 1))
+         (and wrap (< (- selected 1) 1))
+         (tset self :selected-row self.rows))
+     (if scroll (tset self :scroll-target {:row self.selected-row :col self.selected-col}))))
 
  (fn new [cell-width cell-height]
    (let [cell-w cell-width
@@ -155,8 +168,10 @@
          needsDisplay true
          padding {:top 0 :left 0 :bottom 0 :right 0}
          inset {:top 0 :left 0 :bottom 0 :right 0}
-         scroll-x (animator.new 0 0 0 playdate.easingFunctions.easeOutCubic)
-         scroll-y (animator.new 0 0 0 playdate.easingFunctions.easeOutCubic)
+         scrollEasingFunction playdate.easingFunctions.easeOutCubic
+         scrollDuration 250
+         scroll-x {:currentValue (fn [] 0)}
+         scroll-y {:currentValue (fn [] 0)}
          selected-row 1
          selected-col 1
          rows 1
@@ -166,6 +181,7 @@
       : inset : padding
       : needsDisplay
       : drawInRect
+      : scrollEasingFunction : setScrollDuration : scrollDuration : setScrollPosition
       : setNumberOfRows : setNumberOfColumns : setCellSize
       : setCellPadding : setContentInset
       : getSelectedRow

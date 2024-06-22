@@ -18,11 +18,13 @@
          $
          $.paused
          $
+         $.expired
+         $
          (let [newTime (math.min (+ dt $.currentTime) $.duration)
                newLeft (math.max (- $.timeLeft dt) 0)
                expired (>= newTime $.duration)
                easeFn  $.easingFunction
-               newVal  (easeFn newTime $.startValue $.endValue $.duration)
+               newVal  (easeFn newTime $.startValue (- $.endValue $.startValue) $.duration)
                ]
            (if (and expired $.reverses)
                (doto $
@@ -34,9 +36,11 @@
                  (tset :currentTime 0)
                  )
                expired
-               (doto $
-                 (tset :expired true)
-                 (tset :discarded $.discardOnCompletion))
+               (do
+                 (doto $
+                  (tset :expired true)
+                  (tset :value $.endValue)
+                  (tset :discarded $.discardOnCompletion)))
                ;; else
                (doto $
                  (tset :currentTime newTime)
