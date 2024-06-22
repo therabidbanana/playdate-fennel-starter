@@ -1,4 +1,4 @@
-(import-macros {: defmodule : inspect} :source.lib.macros)
+(import-macros {: defmodule : inspect : div} :source.lib.macros)
 
 
 (if (not (?. _G.playdate :ui))
@@ -93,8 +93,10 @@
          quad   (love.graphics.newQuad (math.floor scroll-x) (math.floor scroll-y)
                                        width height canvas-w canvas-h)]
      (if self.scroll-target
-         (let [new-scroll-x (* (+ padding.left cell-w padding.right) (- self.scroll-target.col 1))
-               new-scroll-y (* (+ padding.top cell-h padding.bottom) (- self.scroll-target.row 1))]
+         (let [new-scroll-x (- (* (+ padding.left cell-w padding.right) (- self.scroll-target.col 1))
+                               (if self.scroll-target.center (div (- width cell-w padding.left padding.right) 2) 0))
+               new-scroll-y (- (* (+ padding.top cell-h padding.bottom) (- self.scroll-target.row 1))
+                               (if self.scroll-target.center (div (- height cell-h padding.top padding.bottom) 2) 0))]
            (tset self :scroll-target nil)
            (self:setScrollPosition new-scroll-x new-scroll-y)
            )
@@ -148,7 +150,8 @@
          (tset self :selected-row (+ 1 selected))
          (and wrap (> (+ 1 selected) self.rows))
          (tset self :selected-row 1))
-     (if scroll (tset self :scroll-target {:row self.selected-row :col self.selected-col}))
+     (if scroll (tset self :scroll-target {:row self.selected-row :col self.selected-col
+                                           :center true}))
      ))
 
  (fn selectPreviousRow [self wrap scroll]
@@ -160,7 +163,8 @@
          (tset self :selected-row (- selected 1))
          (and wrap (< (- selected 1) 1))
          (tset self :selected-row self.rows))
-     (if scroll (tset self :scroll-target {:row self.selected-row :col self.selected-col}))))
+     (if scroll (tset self :scroll-target {:row self.selected-row :col self.selected-col
+                                           :center true}))))
 
  (fn new [cell-width cell-height]
    (let [cell-w cell-width

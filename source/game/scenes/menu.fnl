@@ -16,6 +16,9 @@
                                {:text "Corge"}
                                {:text "Grault"}
                                {:text "Garply"}
+                               {:text "Corge"}
+                               {:text "Grault"}
+                               {:text "Garply"}
                                ]})
     ;; (tset $ :state :listview (testScroll pd gfx))
     )
