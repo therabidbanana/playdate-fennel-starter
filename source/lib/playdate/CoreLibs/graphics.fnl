@@ -41,7 +41,7 @@
     (let [file (love.filesystem.read (.. lang ".strings"))]
       (tset strings lang {})
       (each [k v (string.gmatch file "\"([^\"]+)\"%s*=%s*\"([^\"]+)\"")]
-        (tset strings lang k v))
+        (tset strings lang k (v:gsub "\\n" "\n")))
       ))
 
   (fn getLocalizedText [key lang]
@@ -113,7 +113,8 @@
       )
     )
 
-  (fn setLineWidth [width] "todo")
+  (fn setLineWidth [width]
+    (love.graphics.setLineWidth (- width 1)))
 
   (fn drawRoundRect [& rest]
     (love.graphics.push :all)
@@ -128,9 +129,16 @@
       )
     (love.graphics.pop))
 
-  (fn lockFocus [canvas] "todo")
-  ;; (name-font:drawText nametag double padding)
-  (fn unlockFocus [] "TODO")
+  (fn lockFocus [canvas]
+    (love.graphics.push :all)
+    (if (?. canvas :image)
+        (love.graphics.setCanvas canvas.image)
+        )
+    )
+
+  (fn unlockFocus []
+    (love.graphics.pop)
+    )
   
   (fn getImageDrawMode [mode]
     _G.playdate.graphics._mode)

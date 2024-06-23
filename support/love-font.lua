@@ -14,8 +14,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Lua script that converts a Playdate Caps .fnt to a BMFont .fnt for usage in Love2d.
 
 Usage: 
-  `lua caps-to-bmfont.lua <input_caps_font_path> <input_caps_image_path> <output_bmf_font_path>`
-  `lua caps-to-bmfont.lua Roobert-11-Bold.fnt Roobert-11-Bold-table-22-22.png Roobert-BMFont.fnt`
+  `lua love-font.lua <input_caps_font_path> <input_caps_image_path> <output_bmf_font_path>`
+  `lua love-font.lua Roobert-11-Bold.fnt Roobert-11-Bold-table-22-22.png Roobert-BMFont.fnt`
 
 Designed around these specs:
   * https://sdk.play.date/1.9.3/Inside%20Playdate.html#_supported_characters

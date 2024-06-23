@@ -24,8 +24,8 @@ This is very much a work in progress, most of the functions are still stubbed an
 Features to add next:
 
 <!-- 1. Render in a similar aspect ratio -->
-2. Render text lib that works like playdate
-3. Handle alternate fonts (require build for font files?)
+<!-- 2. Render text lib that works like playdate -->
+<!-- 3. Handle alternate fonts (require build for font files?) -->
 <!-- 3. Input handlers (look at how Playbit does it) -->
 <!-- 4. Render image -->
 <!-- 5. Sprite handling -->
@@ -74,3 +74,12 @@ playdate.ps1 :
 ```
 C:\Users\David\Documents\PlaydateSDK\bin\PlaydateSimulator.exe $args
 ```
+
+
+### Building BM fonts for Love
+
+Using script from Playbit framework - Example: 
+
+---
+lua "C:\Users\David\projects\game\fennel-test\support\love-font.lua" "C:\Users\David\projects\game\fennel-test\source\assets\fonts\Nontendo-Bold.fnt" "C:\Users\David\projects\game\fennel-test\source\assets\fonts\Nontendo-Bold-table-10-13.png" output.fnt -
+---
