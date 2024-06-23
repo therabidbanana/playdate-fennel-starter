@@ -43,6 +43,7 @@
                                   (string.find imagetable ".+%-table%-(%d+)%-(%d+)%..+")
                                   (values nil nil grid-size grid-size))
         layer-def (?. layers layer-id)
+        layer-name (?. layer-def :identifier)
         tile-w (tonumber (or tile-w grid-size))
         tile-h (tonumber (or tile-h grid-size))
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
@@ -57,8 +58,9 @@
         layer-enums (?. layer-def :uiFilterTags)
         ]
     {: imagetable : tiles : tile-w : tile-h
-     : layer-type : entities : layer-id
+     : layer-type : entities
      : tile-enums : layer-enums
+     : layer-name : layer-id
      :map-w map-width :map-h map-height
      :grid-w (// map-width tile-w) :grid-h (// map-height tile-h)
      }))

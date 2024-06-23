@@ -7,14 +7,14 @@
     {: entities : tile-h : tile-w})
 
   (fn prepare-tile-layer [{: layer-id : imagetable : tiles : grid-w : grid-h : tile-h : tile-w
-                           : tile-enums : layer-enums}]
+                           : layer-name : tile-enums : layer-enums}]
     (let [tileset (gfx.imagetable.new imagetable)
           tilemap (gfx.tilemap.new)
           _       (tilemap:setImageTable tileset)]
       (tilemap:setSize grid-w grid-h)
       (each [_ {: x : y : tile} (ipairs tiles)]
         (tilemap:setTileAtPosition x y tile))
-      {: tilemap : layer-id : tile-h : tile-w : layer-enums : tile-enums}))
+      {: tilemap : layer-id : layer-name : tile-h : tile-w : layer-enums : tile-enums}))
 
   (fn prepare-level [{: layers : w : h}]
     (let [tile-layers (icollect [_ { : layer-type &as l} (ipairs layers)]
@@ -26,8 +26,12 @@
                             ))]
       {: tile-layers : entity-layers : w : h}))
 
-  (fn tile-layer-sprite [layer solid?]
+  (fn tile-layer-sprite [layer solid? layer-details]
     (let [bg (gfx.sprite.new)
+          solid? (or solid? (?. layer-details layer.layer-name :solid?))
+          z-index (or (?. layer-details layer.layer-name :z-index)
+                      (if solid? -90 -100))
+          layer-details (or (?. layer-details layer.layer-name) {})
           walls (if solid?
                     (gfx.sprite.addWallSprites layer.tilemap)
                     [])]
@@ -41,38 +45,40 @@
       (bg:setTilemap layer.tilemap)
       (bg:setCenter 0 0)
       (bg:moveTo 0 0)
-      (bg:setZIndex (if solid? -90 -100))
+      (bg:setZIndex z-index)
       (bg:add)
       {:tilemap layer.tilemap
        :sprite  bg})
     )
 
 
-  (fn add-entities! [{: tile-h : tile-w &as layer} entity-map]
-    (icollect [_ {: id : width : height : x : y : fields} (ipairs layer.entities)]
+  (fn add-entities! [{: tile-h : tile-w &as layer} entity-map layer-details all-entities]
+    (icollect [_ {: id : width : height : x : y : fields} (ipairs layer.entities) &into all-entities]
       (let [entity-mod (?. entity-map id)
             ;; NOTE: Skips unknown entities instead of error
             entity (if entity-mod
-                       (entity-mod.new! x y {: fields : tile-h : tile-w : width : height}))]
-        (if entity (entity:add))
+                       (entity-mod.new! x y {: fields : tile-h : tile-w : width : height
+                                             :layer-details (or (?. layer-details id) {})}))]
+        (if (?. entity :add) (entity:add))
         entity)))
 
   ;; TODO: Make a level parser that can take entities map and prep a full level
   ;; (normalize the code from calm-sea and standardize)
-  (fn prepare-level! [level-data entity-map]
+  (fn prepare-level! [level-data entity-map layer-details]
     (let [loaded (prepare-level level-data)
           layers (icollect [_ {: layer-enums &as layer} (ipairs loaded.tile-layers)]
                    (if
                     (?. (icollect [_ v (ipairs (. layer :layer-enums))] (if (= "wall" v) true)) 1)
-                    (tile-layer-sprite layer true)
-                    (tile-layer-sprite layer)))
-          entities (?. loaded :entity-layers 1)
-          entities (add-entities! entities entity-map)]
+                    (tile-layer-sprite layer true layer-details)
+                    (tile-layer-sprite layer false layer-details)))
+          all-entities []]
+      (each [k v (ipairs (?. loaded :entity-layers))]
+        (add-entities! v entity-map layer-details all-entities))
       {
        :stage-width loaded.w :stage-height loaded.h
        :ticks 0
        : layers
-       : entities
+       :entities all-entities
        }))
 
   )
