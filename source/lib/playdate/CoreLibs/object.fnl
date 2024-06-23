@@ -14,16 +14,50 @@
           :key-map
           {:a "s" :b "a"
            :up "up" :down "down" :left "left" :right "right"}
+          :invert-map
+          {"s" :a "a" :b
+           :up "up" :down "down" :left "left" :right "right"}
           :buttons-held
           {:a -1 :b -1 :up -1 :down -1 :left -1 :right -1}
+          ;; Virtual mapping button input with keyboard / mouse
+          :love-press
+          {:a false :b false :up false :down false :left false :right false}
+          ;; Tracks touch ids
+          :touches {}
           :just-pressed
           {:a false :b false :up false :down false :left false :right false}
           :just-released
           {:a false :b false :up false :down false :left false :right false}
           })
+  (local frame {:top 30 :bottom 320 :left 20 :right 40})
+  (local fake-buttons [{:btn :b
+                        :x (+ frame.left 20) :y (+ 240 frame.top 40)
+                        :radius 25
+                        :w 50 :h 50}
+                       {:btn :a
+                        :x (+ frame.left 80) :y (+ 240 frame.top 40)
+                        :radius 25
+                        :w 50 :h 50}
+                       {:btn :up
+                        :x (+ frame.left 320) :y (+ 240 frame.top 40)
+                        :radius 25
+                        :w 50 :h 50}
+                       {:btn :down
+                        :x (+ frame.left 320) :y (+ 240 frame.top 140)
+                        :radius 25
+                        :w 50 :h 50}
+                       {:btn :left
+                        :x (+ frame.left 270) :y (+ 240 frame.top 90)
+                        :radius 25
+                        :w 50 :h 50}
+                       {:btn :right
+                        :x (+ frame.left 370) :y (+ 240 frame.top 90)
+                        :radius 25
+                        :w 50 :h 50}
+                       ])
   (local timestamp 0)
   (local canvas (love.graphics.newCanvas 400 240))
-  (local canvas-scale 2)
+  (local canvas-scale 1)
   (local COLOR_WHITE { :r (/ 176 255) :g (/ 174 255) :b (/ 167 255) })
   (local COLOR_BLACK { :r (/ 49  255) :g (/ 47  255) :b (/ 40  255)  })
 
@@ -194,8 +228,67 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     ;; -- A lower frame time means more frames per second.
       (love.graphics.print (string.format "%.1f fps" (/ 1000 (* 1000 delta))) 320 10))
     )
+
+  (fn keypressed [key]
+    (let [mapped (?. input-state :invert-map key)]
+      (if mapped
+          (tset input-state :love-press mapped true))))
+
+  (fn keyreleased [key]
+    (let [mapped (?. input-state :invert-map key)]
+      (if mapped
+          (tset input-state :love-press mapped false))))
+
+  (fn mousepressed [x y button]
+    (let [real-x (/ x canvas-scale)
+          real-y (/ y canvas-scale)]
+      (each [i btn (ipairs fake-buttons)]
+        (if (and
+             (<= btn.x real-x) (>= (+ btn.x btn.w) real-x)
+             (<= btn.y real-y) (>= (+ btn.y btn.h) real-y))
+            (do
+              (tset input-state :love-press btn.btn true)
+              (tset input-state :mouse-pressed [btn.btn])))
+        )))
+
+  (fn touchpressed [id x y button]
+    (let [real-x (/ x canvas-scale)
+          real-y (/ y canvas-scale)]
+      (each [i btn (ipairs fake-buttons)]
+        (if (and
+             (<= btn.x real-x) (>= (+ btn.x btn.w) real-x)
+             (<= btn.y real-y) (>= (+ btn.y btn.h) real-y))
+            (do
+              (tset input-state :love-press btn.btn true)
+              (tset input-state :touches id btn.btn)))
+        )))
+
+  (fn mousereleased [x y button is-touch]
+    (let [real-x (/ x canvas-scale)
+          real-y (/ y canvas-scale)]
+      (each [i btn (ipairs input-state.mouse-pressed)]
+        (tset input-state :love-press btn false))
+      (tset input-state :mouse-pressed [])
+      ))
+
+  (fn touchreleased [id x y]
+    (let [real-x (/ x canvas-scale)
+          real-y (/ y canvas-scale)]
+      (let [btn (?. input-state.touches id)]
+        (if btn
+            (tset input-state :love-press btn false))
+        (tset input-state :touches id nil))
+      ))
+
   (fn love-load []
-    (love.window.setMode (* 400 canvas-scale) (* 240 canvas-scale))
+    (set love.keypressed keypressed)
+    (set love.keyreleased keyreleased)
+    (set love.mousepressed mousepressed)
+    (set love.mousereleased mousereleased)
+    (set love.touchpressed touchpressed)
+    (set love.touchreleased touchreleased)
+    (love.window.setMode (+ (* 400 canvas-scale) (* (+ frame.left frame.right) canvas-scale))
+                         (+ (* 240 canvas-scale) (* (+ frame.top frame.bottom) canvas-scale)))
     ;; (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
     ;; (love.graphics.setColor COLOR_BLACK.r COLOR_BLACK.g COLOR_BLACK.b 1)
     (love.graphics.setLineStyle "smooth")
@@ -211,13 +304,13 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     )
 
 
-  (fn updateInputTimers! [{: key-map : buttons-held : just-pressed : just-released : timer : elapsed &as input-state}]
+  (fn updateInputTimers! [{: key-map : buttons-held : just-pressed : just-released : timer : elapsed : love-press &as input-state}]
     (let [now     (math.floor (* (love.timer.getTime) 1000))
           elapsed  (- now timer)]
       (tset input-state :elapsed elapsed)
       (tset input-state :timer now)
       (each [key time-held (pairs buttons-held)]
-        (let [button-pressed? (love.keyboard.isDown (. key-map key))]
+        (let [button-pressed? (. love-press key)]
           (if (and button-pressed? (< time-held 0))
               (do (tset just-pressed key true)
                   (tset just-released key false)
@@ -251,9 +344,34 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     )
   (fn love-draw-end []
     (love.graphics.setCanvas)
+    (love.graphics.push :all)
     (love.graphics.setShader)
-    (love.graphics.draw canvas 0 0 0 canvas-scale)
-    (love.graphics.setShader shader)
+    (love.graphics.setColor 0.8 0.7 0.2)
+    (love.graphics.rectangle "fill" 0 0
+                             (* (+ 400 frame.left frame.right) canvas-scale) (* (+ 240 frame.top frame.bottom) canvas-scale))
+    ;; (love.graphics.setColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
+    ;; (love.graphics.rectangle "fill" frame.left frame.top
+    ;;                          (* 400 canvas-scale) (* 240 canvas-scale))
+    (love.graphics.setColor 1 1 1 1)
+    (love.graphics.draw canvas (* frame.left canvas-scale) (* frame.top canvas-scale) 0 canvas-scale)
+    ;; (love.graphics.setColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
+
+    (each [i btn (ipairs fake-buttons)]
+      (case btn
+        {: radius : x : y : btn}
+        (do (love.graphics.setColor 0.8 0.75 0.3)
+            (love.graphics.circle "fill" (* (+ x radius) canvas-scale) (* (+ y radius) canvas-scale)
+                                  (* radius canvas-scale))
+            (love.graphics.setColor 0.2 0.2 0.3)
+            (love.graphics.printf btn
+                                  (* (+ x (/ radius 2)) canvas-scale)
+                                  (* (+ y (/ radius 2)) canvas-scale)
+                                  radius))
+        )
+      
+      )
+
+    (love.graphics.pop)
     (tset _G.playdate :_last-image (canvas:newImageData))
     )
 
