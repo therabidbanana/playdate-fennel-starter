@@ -98,8 +98,8 @@
     (tset item :tile-movement-opts opts)
     (tset item :tile-movement-state {:facing (or opts.default-facing :down) :moving nil
                                      :move-x 0 :move-y 0
-                                     :tile-x (// item.x opts.tile-w)
-                                     :tile-y (// item.y opts.tile-h)
+                                     :tile-x (div item.x opts.tile-w)
+                                     :tile-y (div item.y opts.tile-h)
                                      })
     (tset item :tile-movement-react! tile-movement-react!)
     (tset item :->left! ->left!)

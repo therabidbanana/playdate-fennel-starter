@@ -30,6 +30,10 @@ Features to add next:
 <!-- 4. Render image -->
 <!-- 5. Sprite handling -->
 6. Sprite collision support
+  - query sprites at point
+  - add wall sprites
+  - moves with collisions
+  - collides with rect
 <!-- 7. Nine slice support -->
 7. Nine slice fix - sides bleed into corners
 <!-- 8. scrolling in gridview -->

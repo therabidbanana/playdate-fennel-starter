@@ -1,4 +1,4 @@
-(import-macros {: inspect : defns} :source.lib.macros)
+(import-macros {: inspect : defns : div} :source.lib.macros)
 
 (defns :npc
   [gfx playdate.graphics
@@ -61,7 +61,7 @@
       (tset player :tile-h tile-h)
       (tset player :tile-w tile-w)
       (tset player :state {: animation :speed 2 :dx 0 :dy 0 :visible true
-                           :tile-x (// x tile-w) :tile-y (// y tile-h)})
+                           :tile-x (div x tile-w) :tile-y (div y tile-h)})
       (tile.add! player {: tile-h : tile-w})
       player)))
 
