@@ -1,4 +1,4 @@
-(import-macros {: inspect : defns : pd/import} :source.lib.macros)
+(import-macros {: inspect : defns : pd/import : div} :source.lib.macros)
 
 (defns :source.lib.behaviors.tile-movement
   [gfx playdate.graphics]

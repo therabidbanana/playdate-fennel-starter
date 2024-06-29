@@ -55,6 +55,7 @@
   (fn clear [] (love.graphics.clear))
   (local graphics-stack [])
 
+  (fn setDrawOffset [x y] "TODO")
   (fn pushContext [image?]
     (let [curr-context {:mode  _mode}]
       ;; TODO - handle set canvas
