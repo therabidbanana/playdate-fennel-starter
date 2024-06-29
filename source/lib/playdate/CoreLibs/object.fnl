@@ -39,21 +39,17 @@
                         :radius 25
                         :w 50 :h 50}
                        {:btn :up
-                        :x (+ frame.left 320) :y (+ 240 frame.top 40)
-                        :radius 25
-                        :w 50 :h 50}
+                        :x (+ frame.left 330) :y (+ 240 frame.top 40)
+                        :w 30 :h 50}
                        {:btn :down
-                        :x (+ frame.left 320) :y (+ 240 frame.top 140)
-                        :radius 25
-                        :w 50 :h 50}
+                        :x (+ frame.left 330) :y (+ 240 frame.top 140)
+                        :w 30 :h 50}
                        {:btn :left
-                        :x (+ frame.left 270) :y (+ 240 frame.top 90)
-                        :radius 25
-                        :w 50 :h 50}
+                        :x (+ frame.left 270) :y (+ 240 frame.top 100)
+                        :w 50 :h 30}
                        {:btn :right
-                        :x (+ frame.left 370) :y (+ 240 frame.top 90)
-                        :radius 25
-                        :w 50 :h 50}
+                        :x (+ frame.left 370) :y (+ 240 frame.top 100)
+                        :w 50 :h 30}
                        ])
   (local timestamp 0)
   (local canvas (love.graphics.newCanvas 400 240))
@@ -266,7 +262,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (fn mousereleased [x y button is-touch]
     (let [real-x (/ x canvas-scale)
           real-y (/ y canvas-scale)]
-      (each [i btn (ipairs input-state.mouse-pressed)]
+      (each [i btn (ipairs (or input-state.mouse-pressed []))]
         (tset input-state :love-press btn false))
       (tset input-state :mouse-pressed [])
       ))
@@ -349,9 +345,10 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (love.graphics.setColor 0.8 0.7 0.2)
     (love.graphics.rectangle "fill" 0 0
                              (* (+ 400 frame.left frame.right) canvas-scale) (* (+ 240 frame.top frame.bottom) canvas-scale))
-    ;; (love.graphics.setColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
-    ;; (love.graphics.rectangle "fill" frame.left frame.top
-    ;;                          (* 400 canvas-scale) (* 240 canvas-scale))
+    (love.graphics.setLineWidth 8)
+    (love.graphics.setColor 0.1 0.1 0.1 1)
+    (love.graphics.rectangle "line" frame.left frame.top
+                             (* 400 canvas-scale) (* 240 canvas-scale))
     (love.graphics.setColor 1 1 1 1)
     (love.graphics.draw canvas (* frame.left canvas-scale) (* frame.top canvas-scale) 0 canvas-scale)
     ;; (love.graphics.setColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
@@ -367,8 +364,13 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
                                   (* (+ x (/ radius 2)) canvas-scale)
                                   (* (+ y (/ radius 2)) canvas-scale)
                                   radius))
-        )
-      
+        {: w : h : x : y : btn}
+        (do (love.graphics.setColor 0.8 0.75 0.3)
+            (love.graphics.rectangle "fill"
+                                     (* x canvas-scale) (* y canvas-scale)
+                                     (* w canvas-scale) (* h canvas-scale))
+            (love.graphics.setColor 0.2 0.2 0.3)
+            ))
       )
 
     (love.graphics.pop)
