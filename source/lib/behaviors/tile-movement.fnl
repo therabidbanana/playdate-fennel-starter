@@ -90,8 +90,10 @@
       (tset state :tile-x target-x-tile)
       ;; (tset state :move-y diff-y)
       (tset state :tile-y target-y-tile)
-      (tset self :x (+ (* target-x-tile tile-w) (- (or dx 0))))
-      (tset self :y (+ (* target-y-tile tile-h) (- (or dy 0))))
+      ;; TODO: This was supposed to correct tile misalignment - bounce back
+      ;; but it also causes weirdness
+      ;; (tset self :x (+ (* target-x-tile tile-w) (- (or dx 0))))
+      ;; (tset self :y (+ (* target-y-tile tile-h) (- (or dy 0))))
       (tset state :moving nil)))
 
   (fn add! [item opts]

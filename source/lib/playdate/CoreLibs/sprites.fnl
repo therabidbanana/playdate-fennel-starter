@@ -35,7 +35,7 @@
 
  (fn setCenter [] "TODO")
  (fn setImage [self image] (tset self :image image))
- (fn instance-update [self])
+ (fn instance-update [self] self)
 
  (fn draw [self]
    (if self.image
@@ -118,7 +118,7 @@
        (and (= dy 0) (or (<= (+ a.y a.h) b.y)
                          (<= (+ b.y b.h) a.y)))
        (values 0 0 1)
-       (let [;; Distance to entry/exit (inverse of time)
+       (let [;; Distance to entry/exit inverse
              ax2 (+ a.x a.w)
              bx2 (+ b.x b.w)
              ay2 (+ a.y a.h)
@@ -147,13 +147,12 @@
                          ;; (and (< xenter 0) (< yenter 0))
                          (and (> xenter yexit) (> yenter xexit))
                          (> xenter 1) (> yenter 1))]
-         (inspect {: a : b : dx : dy : xenter : yenter : entryTime : exitTime : missed? : yexit : xexit})
+         ;; (inspect {: a : b : dx : dy : xenter : yenter : entryTime : exitTime : missed? : yexit : xexit})
          (if missed?
              (values 0 0 1)
 
              (or (< xenter yenter) (= yenter -inf))
              (do
-               (inspect "x enter first ")
                (if (< xinventry 0)
                   (values 1 0 entryTime)
                   (values -1 0 entryTime)))
@@ -213,6 +212,7 @@
                    (+ self.y first-hit.move.y)
                    y)
          ]
+     ;; (if first-hit (inspect first-hit))
      (moveTo self new-x new-y)
      (values new-x new-y collisions count)
      )
