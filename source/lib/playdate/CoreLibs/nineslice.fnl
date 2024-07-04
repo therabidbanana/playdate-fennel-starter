@@ -25,7 +25,11 @@
              scale-mx (/ w mw)
              scale-my (/ h mh)
              ]
-         (batch:add self.quads.mm mx my 0 scale-mx scale-my)
+         (for [sy 0 (math.floor scale-l)]
+           (for [sx 0 (math.floor scale-t)]
+             (batch:add self.quads.mm
+                        (+ mx (* sx self.inner-dims.w))
+                        (+ my (* sy self.inner-dims.h)) 0 1 1)))
          (for [s 0 (math.floor scale-t)]
            (batch:add self.quads.tm (+ mx (* s self.inner-dims.w)) 0 0 1 1)
            )

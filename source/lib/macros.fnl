@@ -32,6 +32,7 @@
 (fn defns [ns-name bindings & forms]
   (let [names (icollect [_ [t name & def] (ipairs forms)]
                 (if (= t (sym :local)) name
+                    (= t (sym :var)) name
                     (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
               (values (tostring name) name))]
@@ -48,6 +49,7 @@
 (fn defmodule [module bindings & forms]
   (let [names (icollect [_ [t name & def] (ipairs forms)]
                 (if (= t (sym :local)) name
+                    (= t (sym :var)) name
                     (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
               (values (tostring name) name))]
@@ -117,6 +119,27 @@
   (if _G.LOVE
       `(lua "playdate = {}; LOVE = true")))
 
-{: inspect : pd/import : pd/load : love/patch : defns
- : div : clamp : round : defmodule }
+(fn require/patch []
+  (if _G.LOVE
+      `(lua "-- LOVE compiled from fennel")
+      `(lua "
+package = {loaded = {}, preload = {}}
+function require(name)
+  if not package.loaded[name] then
+    local _2_
+    _2_ = package.preload[name]
+    package.loaded[name] = _2_()
+  end
+  local t_5_ = package.loaded
+  if (nil ~= t_5_) then
+    t_5_ = (t_5_)[name]
+  end
+  return t_5_
+end
+")
+      ))
+
+{: inspect : pd/import : pd/load : love/patch : require/patch
+ : defns : defmodule
+ : div : clamp : round  }
 

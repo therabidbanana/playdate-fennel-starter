@@ -8,19 +8,70 @@
 
 (defmodule
  _G.playdate.graphics.sprite
- []
+ [(ok? bit) (pcall require :bit)
+  bit       (if ok?
+                bit
+                {:band (fn bitand [num other]
+                         (var found 0)
+                         (var a num)
+                         (var b other)
+                         (for [i 1 32]
+                           (if (= (% a 2) (% b 2) 1)
+                               (set found (+ found (^ 2 (- i 1)))))
+                           (set a (math.floor (/ a 2)))
+                           (set b (math.floor (/ b 2)))
+                           )
+                         found)})
+  ;; (require :bit)
+  ]
 
  (local sprite-state {:sprites []})
+ (fn -contains? [b1 p2]
+   (and (<= b1.x p2.x (+ b1.x b1.w))
+        (<= b1.y p2.y (+ b1.y b1.h))
+        ))
+ (fn -collides? [b1 b2]
+   (and (> (+ b1.x b1.w) b2.x)
+        (< b1.x (+ b2.x b2.w))
+        (> (+ b1.y b1.h) b2.y)
+        (< b1.y (+ b2.y b2.h))
+        ))
+ (fn -inGroups? [collides-with groups]
+   (> (bit.band groups collides-with) 0))
+
  (fn update []
    (each [i sprite (ipairs sprite-state.sprites)]
      (sprite:update))
    (each [i sprite (ipairs sprite-state.sprites)]
-     (sprite:draw sprite.x sprite.y sprite.width sprite.height))
+     (if (?. sprite :draw)
+         (do
+           (love.graphics.push :all)
+           (love.graphics.translate sprite.x sprite.y)
+           (sprite:draw 0 0 sprite.width sprite.height)
+           ;; (love.graphics.translate 0 0)
+           (love.graphics.pop))))
    )
+
+ (fn remove [self]
+   (tset sprite-state :sprites
+         (icollect [i spr (ipairs sprite-state.sprites)]
+           (if (= spr self) nil spr))))
 
  (fn removeAll []
    (tset sprite-state :sprites [])
    )
+
+ (fn overlappingSprites [self]
+   (if self.collisionBox
+       (icollect [i sprite (ipairs sprite-state.sprites)]
+         (if (= sprite self) nil
+             (and sprite.collisionBox
+                  (-inGroups? self.collide-mask sprite.group-mask)
+                  (-collides? self.collisionBox sprite.collisionBox))
+             sprite))
+       [])
+   )
+
 
  (fn performOnAllSprites [func]
    (each [i sprite (ipairs sprite-state.sprites)]
@@ -33,13 +84,14 @@
    (tset self :width w)
    (tset self :height h))
 
- (fn setCenter [] "TODO")
+ (fn setCenter [self x y] "TODO")
+ (fn setSize [self w h] "TODO")
  (fn setImage [self image] (tset self :image image))
  (fn instance-update [self] self)
 
- (fn draw [self]
+ (fn draw [self x y]
    (if self.image
-       (self.image:draw self.x self.y))
+       (self.image:draw x y))
    ;; (love.graphics.drawq self.image self.x self.y)
    )
 
@@ -71,11 +123,29 @@
      (icollect [i rect (ipairs tilerects)]
        (addEmptyCollisionSprite rect))))
 
- (fn querySpritesAtPoint []
-   "TODO" [])
+ (fn querySpritesAtPoint [& rest]
+   (let [point (case rest
+                [{: x : y}]
+                {: x : y}
+                [x y]
+                {: x : y})]
+     (icollect [i spr (ipairs sprite-state.sprites)]
+       (if (and spr.collisionBox
+                (-contains? spr.collisionBox point))
+           spr)
+       )))
 
- (fn querySpritesInRect []
-   "TODO" [])
+ (fn querySpritesInRect [& rest]
+   (let [rect (case rest
+                [{: x : y : w : h : width : height}]
+                {: x : y : w : h}
+                [x y w h]
+                {: x : y : w : h})]
+     (icollect [i spr (ipairs sprite-state.sprites)]
+       (if (and spr.collisionBox
+                (-collides? rect spr.collisionBox))
+           spr)
+       )))
 
  (fn -updateCollisionBox [self]
    (if self.collideRect
@@ -90,19 +160,22 @@
    )
 
  (fn setGroups [self list]
+   (var mask 0)
+   (each [i v (ipairs list)]
+     (set mask (+ mask (^ 2 v))))
+   (tset self :group-mask mask)
    (tset self :groups list))
 
  (fn setCollidesWithGroups [self list]
-   (tset self :collideGroups list))
+   (var mask 0)
+   (each [i v (ipairs list)]
+     (set mask (+ mask (^ 2 v))))
+   (tset self :collide-mask mask)
+   (tset self :collideGroups list)
+   )
 
  (local inf math.huge)
  (local -inf (- math.huge))
- (fn collides? [b1 b2]
-   (and (> (+ b1.x b1.w) b2.x)
-        (< b1.x (+ b2.x b2.w))
-        (> (+ b1.y b1.h) b2.y)
-        (< b1.y (+ b2.y b2.h))
-        ))
 
  ;; https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/swept-aabb-collision-detection-and-response-r3084/
  ;; https://gist.github.com/tesselode/e1bcf22f2c47baaedcfc472e78cac55e
@@ -190,7 +263,9 @@
            ;; TODO: Add broad phase check (simpler overlap aabb with bigger box)
            (if (= spr self) nil
                ;; Faster aabb
-               (and spr.collisionBox (collides? moveBox spr.collisionBox))
+               (and spr.collisionBox
+                    (-inGroups? self.collide-mask spr.group-mask)
+                    (-collides? moveBox spr.collisionBox))
                (let [(normx normy collidedt) (-sweptaabb box1 spr.collisionBox dx dy)]
                  ;; TODO - response slide/bounce & ordering multiple?
                  (if (< collidedt 1)
@@ -233,11 +308,8 @@
          width 0
          height 0
          sprite { : x : y : width : height : z-index : groups
-                  : add :update instance-update : draw : markDirty
-                  : setZIndex : setImage : setBounds : setCenter : setTilemap
-                  : setCollideRect : setGroups : setCollidesWithGroups
-                  : moveWithCollisions
-                  : moveTo : moveBy}]
+                  :update instance-update}]
+     (setmetatable sprite {:__index _G.playdate.graphics.sprite})
      sprite)
    )
  )
