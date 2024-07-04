@@ -15,33 +15,31 @@ The Playdate is a tiny handheld game system that can be easily programmed in Lua
 
 # Love2d Compat Mode
 
-**WORK IN PROGRESS**
-
 This framework allows compiling to a Love2d compatible lua file, with stubs for Playdate libraries and some wrappers to set up similar UI to playdate.
 
-This is very much a work in progress, most of the functions are still stubbed and the render is nothing alike.
+This is very much a work in progress, the only functions that have been replaced are the ones I've personally needed for game making. Available features:
 
-Features to add next:
-
-<!-- 1. Render in a similar aspect ratio -->
-<!-- 2. Render text lib that works like playdate -->
-<!-- 3. Handle alternate fonts (require build for font files?) -->
-<!-- 3. Input handlers (look at how Playbit does it) -->
-<!-- 4. Render image -->
-<!-- 5. Sprite handling -->
+1. Render in a similar aspect ratio
+2. Render text (see build limitations)
+3. Handle alternate fonts
+3. Input handlers (just pressed & pressed)
+  - Crank not yet supported
+4. Render images
+5. Sprite handling
 6. Sprite collision support
-  - query sprites at point
-  - add wall sprites
-  - moves with collisions
-  - collides with rect
-<!-- 7. Nine slice support -->
-7. Nine slice fix - sides bleed into corners
-<!-- 8. scrolling in gridview -->
-<!-- 9. graphics context support (use in gridview) -->
-<!-- 10. blinker support -->
-<!-- 11. padding fix for gridview -->
+7. Nine slice support
+  - Nine slice bug - sides bleed into corners
+8. Basic gridview support
+  - Only list views tested
+9. graphics context support
+10. blinker support
 11. Pathing lib
-12. Sound support
+12. Sound support (see build limitations)
+
+## Build Limitations
+
+* Love cannot play sounds encoded in wav format for playdate, re-encode as ogg for better compatibility.
+* .fnt files are still manually built
 
 # Build Process
 
