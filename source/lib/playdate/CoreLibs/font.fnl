@@ -23,7 +23,7 @@
     )
 
   (fn new [path]
-    (let [full-path (.. path "BM.fnt")
+    (let [full-path (.. path ".bmfnt")
           fnt (love.graphics.newFont full-path)]
       {: fnt : getHeight : getTextWidth : drawText })
     ))

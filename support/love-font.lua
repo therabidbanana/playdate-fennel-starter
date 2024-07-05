@@ -136,7 +136,9 @@ function getAtlasPath(input)
   end
 end
 
-function convert(inputFntPath, inputAtlas, outputFntPath)
+local module = {}
+
+function module.convert(inputFntPath, inputAtlas, outputFntPath)
   local input = {
     tracking = 0,
     tileWidth = 0,
@@ -258,4 +260,4 @@ function convert(inputFntPath, inputAtlas, outputFntPath)
   io.close(outputFile)
 end
 
-return convert(...)
+return module

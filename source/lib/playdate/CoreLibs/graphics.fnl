@@ -9,7 +9,7 @@
    tilemap (require :source.lib.playdate.CoreLibs.tilemap)
    image (require :source.lib.playdate.CoreLibs.image)
    ]
-  (local default-font (love.graphics.newFont "assets/fonts/AshevilleBM.fnt"))
+  (local default-font (font.new :assets/fonts/Asheville))
   (local current-font default-font)
   (local COLOR_WHITE { :r (/ 176 255) :g (/ 174 255) :b (/ 167 255) })
   (local COLOR_BLACK { :r (/ 49  255) :g (/ 47  255) :b (/ 40  255)  })
@@ -154,5 +154,5 @@
   (fn getImageDrawMode [mode]
     _G.playdate.graphics._mode)
 
-  (love.graphics.setFont default-font)
+  (love.graphics.setFont default-font.fnt)
   )

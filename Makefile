@@ -17,6 +17,7 @@ win-compile: source/**/*.fnl
 	powershell.exe "./support/build.ps1"
 
 win-love-compile: source/**/*.fnl
+	powershell.exe "fennel --add-package-path './support/?.lua' .\support\build-font.fnl"
 	powershell.exe "./support/buildlove.ps1"
 
 win-love-launch: win-love-compile

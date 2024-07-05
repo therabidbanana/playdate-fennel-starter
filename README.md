@@ -39,7 +39,7 @@ This is very much a work in progress, the only functions that have been replaced
 ## Build Limitations
 
 * Love cannot play sounds encoded in wav format for playdate, re-encode as ogg for better compatibility.
-* .fnt files are still manually built
+* Love cannot use playdate formatted .fnt files - there is a build step to convert to .bmfnt files (Playbit library)
 
 # Build Process
 
