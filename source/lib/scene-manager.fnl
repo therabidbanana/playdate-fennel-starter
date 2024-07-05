@@ -1,6 +1,8 @@
 (import-macros {: inspect : defns : pd/import} :source.lib.macros)
 
 (pd/import :CoreLibs/animation)
+(pd/import :CoreLibs/easing)
+(pd/import :CoreLibs/animator)
 
 (let [gfx playdate.graphics
       animation  gfx.animation
@@ -9,25 +11,31 @@
   (fn add-scene! [$ name scene]
     (doto $ (tset :scenes name scene)))
 
-  (fn load-scenes! [{: scenes &as $} table]
+  (fn load-scenes! [{: scenes &as $} table game-state]
     (tset $ :scenes table)
+    (tset $ :game-state (or game-state {}))
+    $)
+
+  (fn reset-state! [{: scenes &as $} game-state]
+    (tset $ :game-state (or game-state {}))
     $)
 
   (fn exit-scene! [$ scene]
     (tset $ :last-screen (gfx.getDisplayImage))
     (tset $ :fade-out-anim (playdate.graphics.animator.new 300 0 -400 playdate.easingFunctions.outCubic))
     (gfx.clear)
-    (if (and scene (?. scene :exit!)) (scene:exit!))
+    (if (and scene (?. scene :exit!)) (scene:exit! $.game-state))
     (sprite.removeAll)
     )
 
   (fn select! [{: active : scenes &as $} name]
     (if active ($:exit-scene! active))
     (tset $ :active (?. scenes name))
-    ($.active:enter!))
+    ($.active:enter! $.game-state))
 
   (fn tick! [{: active &as $}]
-    (if (and active (?. active :tick!)) (active:tick!))
+    (if (and active (?. active :tick!)) (active:tick! $.game-state))
+    (playdate.timer.updateTimers)
     (animation.blinker.updateAll)
     )
 
@@ -57,6 +65,7 @@
    : select!
    : draw!
    : transition-draw!
+   : reset-state!
    : tick!
    :scenes {}})
 

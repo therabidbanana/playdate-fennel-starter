@@ -1,4 +1,4 @@
-(import-macros {: inspect : defns} :source.lib.macros)
+(import-macros {: inspect : defns : div} :source.lib.macros)
 
 (defns :player
   [pressed? playdate.buttonIsPressed
@@ -22,10 +22,10 @@
                  (and (<= y 0) (< dy 0)) 0
                  dy)
           [facing-x facing-y] (case state.facing
-                                :left [(- x 8) (+ y (// height 2))]
-                                :right [(+ 40 x) (+ y (// height 2))]
-                                :up [(+ x (// width 2)) (- y 8)]
-                                _ [(+ x (// width 2)) (+ 8 height y)]) ;; 40 for height / width of sprite + 8
+                                :left [(- x 8) (+ y (div height 2))]
+                                :right [(+ 40 x) (+ y (div height 2))]
+                                :up [(+ x (div width 2)) (- y 8)]
+                                _ [(+ x (div width 2)) (+ 8 height y)]) ;; 40 for height / width of sprite + 8
           [facing-sprite & _] (gfx.sprite.querySpritesAtPoint facing-x facing-y)
           ]
       (tset self :state :dx dx)
@@ -51,7 +51,9 @@
     )
 
   (fn draw [{:state {: animation : dx : dy : visible : walking?} &as self} x y w h]
-    (animation:draw x y))
+    ;; (love.graphics.rectangle "fill" x y w h)
+    (animation:draw x y)
+    )
 
   (fn collisionResponse [self other]
     (other:collisionResponse))

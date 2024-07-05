@@ -1,3 +1,5 @@
+(import-macros {: div} :source.lib.macros)
+
 (fn find-level [world name]
   (?.
    (icollect [_ { : identifier &as level} (ipairs (. world :levels))]
@@ -43,10 +45,11 @@
                                   (string.find imagetable ".+%-table%-(%d+)%-(%d+)%..+")
                                   (values nil nil grid-size grid-size))
         layer-def (?. layers layer-id)
+        layer-name (?. layer-def :identifier)
         tile-w (tonumber (or tile-w grid-size))
         tile-h (tonumber (or tile-h grid-size))
         tiles (icollect [_ {:px [x y] : t} (ipairs tiles)]
-                {:x (+ (// x tile-w) 1) :y (+ (// y tile-h) 1) :tile (+ t 1)})
+                {:x (+ (div x tile-w) 1) :y (+ (div y tile-h) 1) :tile (+ t 1)})
         entities (icollect [_ {:px [x y] :__identifier id
                                : width : height
                                : fieldInstances} (ipairs entities)]
@@ -57,10 +60,11 @@
         layer-enums (?. layer-def :uiFilterTags)
         ]
     {: imagetable : tiles : tile-w : tile-h
-     : layer-type : entities : layer-id
+     : layer-type : entities
      : tile-enums : layer-enums
+     : layer-name : layer-id
      :map-w map-width :map-h map-height
-     :grid-w (// map-width tile-w) :grid-h (// map-height tile-h)
+     :grid-w (div map-width tile-w) :grid-h (div map-height tile-h)
      }))
 
 (fn parse-level [{: layerInstances :pxWid w :pxHei h &as level}

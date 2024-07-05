@@ -22,7 +22,8 @@
       self))
 
   (fn draw [{: current-anim &as self} x y]
-    (if (current-anim:isValid) (current-anim:draw x y)
+    (if (current-anim:isValid)
+        (current-anim:draw x y)
         ;; Else move to next frame and draw
         (do
           (self:transition! current-anim.transition-to)
