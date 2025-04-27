@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "love.js": "^11.4.1",
+    "serve": "^14.2.4"
+  }
+}
