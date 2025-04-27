@@ -10,7 +10,7 @@
 (defmodule _G.playdate.ui.gridview
   [
    animator (require :source.lib.playdate.CoreLibs.animator)
-   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   love-wrap (require :source.lib.playdate.love-wrap)
    ]
  ;; TODO: support multiple sections
 

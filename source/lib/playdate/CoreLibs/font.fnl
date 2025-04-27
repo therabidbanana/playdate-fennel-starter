@@ -8,7 +8,7 @@
 
 (defmodule _G.playdate.graphics.font
   [
-   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   love-wrap (require :source.lib.playdate.love-wrap)
    ]
 
   (fn getHeight [self]

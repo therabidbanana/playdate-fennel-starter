@@ -1,12 +1,5 @@
-;; Patch for missing require
-(global package {:loaded {} :preload {}})
-(fn _G.require [name]
-  (if (not (. package.loaded name))
-      (tset package.loaded name ((?. package.preload name))))
-  (?. package.loaded name))
-;; End patch for missing require
-
-(import-macros {: inspect : pd/import : pd/load : love/patch} :source.lib.macros)
+(import-macros {: inspect : pd/import : pd/load : require/patch : love/patch} :source.lib.macros)
+(require/patch)
 (love/patch)
 
 (pd/import :CoreLibs/object)

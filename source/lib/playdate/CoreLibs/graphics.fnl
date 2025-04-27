@@ -8,7 +8,7 @@
    imagetable (require :source.lib.playdate.CoreLibs.imagetable)
    tilemap (require :source.lib.playdate.CoreLibs.tilemap)
    image (require :source.lib.playdate.CoreLibs.image)
-   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   love-wrap (require :source.lib.playdate.love-wrap)
    ]
   (local default-font (font.new :assets/fonts/Asheville))
   (local current-font default-font)

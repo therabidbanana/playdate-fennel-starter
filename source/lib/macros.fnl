@@ -132,6 +132,7 @@
   (if _G.LOVE
       `(lua "playdate = {}; LOVE = true")))
 
+;; This hacks around requires not working on Playdate
 (fn require/patch []
   (if _G.LOVE
       `(lua "-- LOVE compiled from fennel")

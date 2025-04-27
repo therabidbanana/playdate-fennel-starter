@@ -23,7 +23,7 @@
                            )
                          found)})
   ;; (require :bit)
-   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   love-wrap (require :source.lib.playdate.love-wrap)
   ]
 
  (local sprite-state {:sprites []})
@@ -45,20 +45,14 @@
      (sprite:update))
    (each [i sprite (ipairs sprite-state.sprites)]
      (if (?. sprite :draw)
-         (let [canvas (love.graphics.newCanvas sprite.width sprite.height)]
+         (let []
            (playdate.graphics.pushContext)
-           (playdate.graphics.pushContext)
-           (playdate.graphics.setDrawOffset 0 0)
-           (love.graphics.setCanvas canvas)
-           ;; (love.graphics.push :all)
-           ;; (playdate.graphics._offsetDrawing sprite.x sprite.y)
-           ;; (love.graphics.translate sprite.x sprite.y)
-           (sprite:draw 0 0 sprite.width sprite.height)
-           ;; (love.graphics.translate 0 0)
-           ;; (love.graphics.pop)
-           (playdate.graphics.popContext)
-           (if sprite.ignores-offset (playdate.graphics.setDrawOffset 0 0))
-           (love-wrap.draw canvas sprite.x sprite.y)
+           (if sprite.ignores-offset
+               (do
+                 (playdate.graphics.setDrawOffset sprite.x sprite.y)
+                 (sprite:draw 0 0)
+                 )
+               (sprite:draw sprite.x sprite.y))
            (playdate.graphics.popContext)
            )))
    )
@@ -107,10 +101,12 @@
  (fn setIgnoresDrawOffset [self ignores-offset]
    (tset self :ignores-offset ignores-offset))
  (fn setImage [self image]
-   (let [(w h) (image:getSize)]
-     (tset self :width w)
-     (tset self :height h)
-     (tset self :image image)))
+   (if (not= self.image image)
+       (let [(w h) (image:getSize)]
+         (tset self :width w)
+         (tset self :height h)
+         (tset self :image image)
+         (self:markDirty))))
  (fn instance-update [self] self)
 
  (fn setVisible [self visible]
@@ -336,7 +332,8 @@
      )
    )
 
- (fn markDirty [] "TODO")
+ (fn markDirty [self]
+   (tset self :dirty true))
 
  (fn moveBy [self dx dy]
    (tset self :x (+ self.x dx))
@@ -352,9 +349,10 @@
          height 1
          ignores-offset false
          visible true
+         dirty true
          sprite { : x : y : width : height : z-index : groups
                   : ignores-offset
-                  : visible
+                  : visible : dirty
                   :update instance-update}]
      (setmetatable sprite {:__index _G.playdate.graphics.sprite})
      sprite)

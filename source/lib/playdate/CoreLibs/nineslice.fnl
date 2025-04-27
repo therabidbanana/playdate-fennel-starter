@@ -9,7 +9,7 @@
 (defmodule
  _G.playdate.graphics.nineSlice
  [
-  love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+  love-wrap (require :source.lib.playdate.love-wrap)
   ]
 
  (fn drawInRect [self x y w h]
