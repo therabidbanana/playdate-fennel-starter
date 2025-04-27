@@ -7,7 +7,9 @@
     (tset _G.playdate :graphics :tilemap {}))
 
 (defmodule _G.playdate.graphics.tilemap
-  []
+  [
+   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   ]
 
   (fn setImageTable [self imagetable]
     (tset self :imagetable imagetable)
@@ -15,7 +17,7 @@
     )
 
   (fn draw [self x y]
-    (love.graphics.draw self.spritebatch x y)
+    (love-wrap.draw self.spritebatch x y)
     )
 
   (fn setSize [self tiles-w tiles-h]
@@ -35,6 +37,12 @@
 
   (fn getTileSize [self]
     (values self.imagetable.tile-w self.imagetable.tile-h))
+
+  (fn getSize [self]
+    (values self.tiles-w self.tiles-h))
+
+  (fn getPixelSize [self]
+    (values (* self.tiles-w self.imagetable.tile-w) (* self.tiles-h self.imagetable.tile-h)))
 
   (fn setTileAtPosition [self x y tileId]
     (let [tile-x (* (- x 1) self.imagetable.tile-w)
@@ -63,5 +71,6 @@
           tiles-h 1]
       { : tiles : tiles-w : tiles-h
         : getCollisionRects : getTileSize : getTiles
+        : getPixelSize : getSize
         : draw : setImageTable : setSize : setTileAtPosition : setTilemap }))
   )

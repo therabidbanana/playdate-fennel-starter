@@ -20,8 +20,37 @@
      _G.playdate.pathfinder.node
      []
 
-     (fn new [id x y]
-       {: id : x : y :conns {}})
+     (fn connectedNodes [self]
+       (icollect [id w (pairs self.conns)]
+         (self.graph:nodeWithID id)
+         ))
+
+     (fn addConnection [self neighbor weight recip?]
+       (tset self.conns neighbor.id weight)
+       (if recip? (neighbor:addConnection self weight))
+       )
+
+     (fn addConnections [self neighbors weights recip?]
+       (each [i node (ipairs neighbors)]
+         (let [weight (. weights i)]
+           (tset self.conns node.id weight)
+           (if recip? (node:addConnection self weight)))))
+
+     (fn removeAllConnections [self recip?]
+       (if recip?
+           (each [neighborid _ (pairs self.conns)]
+             (let [neighbor (self.graph:nodeWithID neighborid)]
+               (neighbor:removeConnection self))))
+       (tset self :conns {}))
+
+     (fn removeConnection [self node recip?]
+       (tset self.conns node.id nil)
+       (if recip? (node:removeConnection self)))
+
+     (fn new [graph id x y]
+       (let [node {: id : x : y :conns {} : graph}]
+         (setmetatable node {:__index _G.playdate.pathfinder.node})
+         node))
      ))
   ;; end node
 
@@ -38,7 +67,6 @@
              (math.abs (- y1 y2)))
           straight))
 
-     ;; TODO - A* search, taxicab heuristic
      (fn findPath [self curr goal heuristic]
        (let [heuristic (or heuristic -taxicab)
              distances {}
@@ -82,7 +110,12 @@
      (fn nodeWithID [self id]
        (?. self.nodes id))
      (fn nodeWithXY [self x y]
-       (?. self.nodes (-xyNodeId x y self.w)))
+       (?. (icollect [_ n (ipairs self.nodes)]
+             (if (and (= n.x x) (= n.y y)) n)) 1))
+     (fn allNodes [self] (icollect [x n (pairs self.nodes)] n))
+     (fn addNewNode [self id x y]
+       (let [node (node.new self id x y)]
+         (tset self.nodes id node)))
 
      (fn addConnectionToNodeWithID [self from to weight recip]
        (let [source (self:nodeWithID from)
@@ -149,18 +182,20 @@
      (fn new2DGrid [width height diagonals nodelist]
        (let [nodes {}
              connections {}
-             graph {: nodes :w width :h height
-                    : addConnections : findPath : nodeWithID : nodeWithXY
-                    : addConnectionToNodeWithID}
+             graph {: nodes :w width :h height : connections}
              hasNode (if nodelist
                          (fn [id] (?. nodelist id))
                          (fn [id] 1))
              ]
+         ;; TODO: improve 2d logic - unclear if the connection setup is correctly
+         ;; accounting for reciprical connections
+         ;;
+         ;; TODO: set up XY lookup table
          (for [y 1 height]
            (for [x 1 width]
              (let [id (-xyNodeId x y width)]
                (if (= 1 (hasNode id))
-                   (tset nodes id (node.new id x y))))))
+                   (tset nodes id (node.new graph id x y))))))
          (for [y 1 height]
            (for [x 1 width]
              (let [nodeid (-xyNodeId x y width)]
@@ -168,6 +203,19 @@
                    (tset connections nodeid (-adjacentNodeIds x y width height diagonals))))
              ))
          (graph:addConnections connections)
+         (setmetatable graph {:__index _G.playdate.pathfinder.graph})
+         graph)
+       )
+
+     ;; TODO: fix node creation to handle x y coords passed in
+     (fn new [len]
+       (let [nodes {}
+             connections {}
+             graph {: nodes : connections}]
+         (setmetatable graph {:__index _G.playdate.pathfinder.graph})
+         (if len
+             (for [x 1 len]
+               (graph:addNewNode x)))
          graph)
        )
      )

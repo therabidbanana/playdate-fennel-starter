@@ -48,29 +48,25 @@
      [0 0]))
 
   (fn ->left! [{:tile-movement-state state :tile-movement-opts { : tile-w : tile-h } &as self}]
-    (tset state :move-x (- 0 tile-w))
-    (tset state :move-y 0)
+    (tset state :move-x (- (or state.move-x 0) tile-w))
     (tset state :tile-x (- state.tile-x 1))
     (tset state :facing :left)
     (tset state :moving :left))
 
   (fn ->right! [{:tile-movement-state state :tile-movement-opts { : tile-w : tile-h } &as self}]
-    (tset state :move-x tile-w)
-    (tset state :move-y 0)
+    (tset state :move-x (+ (or state.move-x) tile-w))
     (tset state :tile-x (+ state.tile-x 1))
     (tset state :facing :right)
     (tset state :moving :right))
 
   (fn ->up! [{:tile-movement-state state :tile-movement-opts { : tile-w : tile-h } &as self}]
-    (tset state :move-x 0)
-    (tset state :move-y (- 0 tile-h))
+    (tset state :move-y (- (or state.move-y 0) tile-h))
     (tset state :tile-y (- state.tile-y 1))
     (tset state :facing :up)
     (tset state :moving :up))
 
   (fn ->down! [{:tile-movement-state state :tile-movement-opts { : tile-w : tile-h } &as self}]
-    (tset state :move-x 0)
-    (tset state :move-y tile-h)
+    (tset state :move-y (+ (or state.move-y 0) tile-h))
     (tset state :tile-y (+ state.tile-y 1))
     (tset state :facing :down)
     (tset state :moving :down))
@@ -82,9 +78,9 @@
   (fn ->stop! [{:tile-movement-state state :tile-movement-opts { : tile-w : tile-h } &as self} dx dy]
     ;; (tset state :move-x (% (+ self.x (or dx 0)) tile-w))
     ;; (tset state :move-y (% (+ self.y (or dy 0)) tile-h))
-    (let [target-x-tile (math.floor (+ (/ self.x tile-w) 0.5))
+    (let [target-x-tile (math.floor (+ (/ (+ self.x (or dx 0)) tile-w) 0.5))
           diff-x (- (* target-x-tile tile-w) self.x)
-          target-y-tile (math.floor (+ (/ self.y tile-h) 0.5))
+          target-y-tile (math.floor (+ (/ (+ self.y (or dy 0)) tile-h) 0.5))
           diff-y (- (* target-y-tile tile-h) self.y)]
       ;; (tset state :move-x diff-x)
       (tset state :tile-x target-x-tile)
@@ -94,7 +90,8 @@
       ;; but it also causes weirdness
       ;; (tset self :x (+ (* target-x-tile tile-w) (- (or dx 0))))
       ;; (tset self :y (+ (* target-y-tile tile-h) (- (or dy 0))))
-      (tset state :moving nil)))
+      (tset state :moving nil)
+      (values diff-x diff-y)))
 
   (fn add! [item opts]
     (tset item :tile-movement-opts opts)

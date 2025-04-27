@@ -35,10 +35,17 @@
     (if (not keep-open?) ($ui:pop-component!))
     (if action (action)))
 
+  (fn -handle-exit [{: can-exit? : on-exit} $ui]
+    (if can-exit? ($ui:pop-component!))
+    (if on-exit (on-exit)))
+
   (fn render! [{: view : rect : on-draw &as comp} $ui]
     (if on-draw (on-draw comp (?. view.options (view:getSelectedRow))))
     ;; needsDisplay note - sprite update sometimes wipes area
+    (gfx.pushContext)
+    (gfx.setDrawOffset 0 0)
     (view:drawInRect (rect:unpack))
+    (gfx.popContext)
     )
 
   (fn tick! [{: view : anim-w : anim-h &as comp} $ui]
@@ -52,9 +59,12 @@
       (if (and anim-w (anim-w:ended)) (tset comp :anim-w nil))
       (if (pressed? playdate.kButtonDown) (view:selectNextRow)
           (pressed? playdate.kButtonUp) (view:selectPreviousRow)
-          (pressed? playdate.kButtonA) (-handle-click selected $ui))))
+          (pressed? playdate.kButtonA) (-handle-click selected $ui)
+          (pressed? playdate.kButtonB) (-handle-exit view $ui)
+          )
+      ))
 
-  (fn new! [proto $ui {: options : x : y : w : h : animate? : on-draw}]
+  (fn new! [proto $ui {: options : x : y : w : h : animate? : can-exit? : on-exit : on-draw}]
     (let [view (playdate.ui.gridview.new 0 10)
           rect (playdate.geometry.rect.new (or x 10) (or y 10)
                                            (if animate? 0 w w 180)
@@ -67,6 +77,8 @@
       (doto view
         (tset :backgroundImage bg)
         (tset :options options)
+        (tset :on-exit on-exit)
+        (tset :can-exit? can-exit?)
         (tset :drawCell -draw-cell)
         (: :setNumberOfRows (length options))
         (: :setCellPadding 0 0 5 4)

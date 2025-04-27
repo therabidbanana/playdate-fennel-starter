@@ -67,10 +67,12 @@
      :grid-w (div map-width tile-w) :grid-h (div map-height tile-h)
      }))
 
-(fn parse-level [{: layerInstances :pxWid w :pxHei h &as level}
+(fn parse-level [{: layerInstances :pxWid w :pxHei h &as level
+                  : fieldInstances }
                  {: tilesets : layers &as world}]
   (let [layers (icollect [_ layer (ipairs layerInstances)]
-                 (parse-layer layer {: w : h : tilesets : layers}))]
-    {: layers : w : h}))
+                 (parse-layer layer {: w : h : tilesets : layers}))
+        fields (collect [_ {:__identifier key :__value val} (ipairs fieldInstances)] (values key val))]
+    {: layers : w : h : fields}))
 
 {: parse-level : find-level : find-details}

@@ -1,4 +1,4 @@
-(import-macros {: defmodule : inspect} :source.lib.macros)
+(import-macros {: defmodule : inspect : div} :source.lib.macros)
 
 (if (not (?. _G.playdate :graphics))
     (tset _G.playdate :graphics {}))
@@ -8,17 +8,21 @@
    imagetable (require :source.lib.playdate.CoreLibs.imagetable)
    tilemap (require :source.lib.playdate.CoreLibs.tilemap)
    image (require :source.lib.playdate.CoreLibs.image)
+   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
    ]
   (local default-font (font.new :assets/fonts/Asheville))
   (local current-font default-font)
   (local COLOR_WHITE { :r (/ 176 255) :g (/ 174 255) :b (/ 167 255) })
   (local COLOR_BLACK { :r (/ 49  255) :g (/ 47  255) :b (/ 40  255)  })
+  (local COLOR_DEBUG { :r (/ 255  255) :g (/ 12  255) :b (/ 12  255)  })
   (local kColorBlack COLOR_BLACK)
   (local kColorWhite COLOR_WHITE)
   (local kDrawModeCopy "copy")
   (local kDrawModeFillWhite "fillWhite")
   (local kDrawModeFillBlack "fillBlack")
   (local _mode kDrawModeCopy)
+  (local _tx 0)
+  (local _ty 0)
   (local strings {})
 
   (fn getDisplayImage []
@@ -55,9 +59,16 @@
   (fn clear [] (love.graphics.clear))
   (local graphics-stack [])
 
-  (fn setDrawOffset [x y] "TODO")
+  (fn setDrawOffset [x y]
+    (_G.love-wrap.set-offset! x y)
+    ;; (tset _G.love-wrap :tx x)
+    ;; (tset _G.love-wrap :ty y)
+    ;; (love.graphics.translate x y)
+    )
   (fn pushContext [image?]
-    (let [curr-context {:mode  _mode}]
+    (let [curr-context {:mode  _mode
+                        :tx    _G.love-wrap.state.tx
+                        :ty    _G.love-wrap.state.ty}]
       ;; TODO - handle set canvas
       (table.insert graphics-stack curr-context)
       (love.graphics.push :all)
@@ -70,6 +81,7 @@
           (do
             (love.graphics.pop)
             (setImageDrawMode prev-context.mode)
+            (setDrawOffset prev-context.tx prev-context.ty)
             ))
       ))
 
@@ -81,8 +93,8 @@
   (fn drawTextInRect [text & rest]
     (let [curr-font (love.graphics.getFont)]
       (case rest
-        [{: x : y : w &as rect}] (love.graphics.printf text x y w)
-        [x y w h] (love.graphics.printf text x y w)
+        [{: x : y : w &as rect}] (love-wrap.printf text x y w)
+        [x y w h] (love-wrap.printf text x y w)
         )
       ;; (love.graphics.printf text x y w)
       )
@@ -91,8 +103,8 @@
   (fn drawText [text & rest]
     (let [curr-font (love.graphics.getFont)]
       (case rest
-        [{: x : y &as rect}] (love.graphics.printf text x y w)
-        [x y] (love.graphics.printf text x y 400)
+        [{: x : y &as rect}] (love-wrap.printf text x y w)
+        [x y] (love-wrap.printf text x y 400)
         )
       ;; (love.graphics.printf text x y w)
       )
@@ -116,9 +128,9 @@
                               _G.playdate.graphics._fg.b)
       (case rest
         [x y width height radius]
-        (love.graphics.rectangle "fill" x y width height radius radius)
+        (love-wrap.rectangle "fill" x y width height radius radius)
         [{: x : y : width : height : h : w} radius]
-        (love.graphics.rectangle "fill" x y (or width w) (or height h) radius radius)
+        (love-wrap.rectangle "fill" x y (or width w) (or height h) radius radius)
         )
       (love.graphics.pop)
       )
@@ -134,11 +146,39 @@
                             _G.playdate.graphics._fg.b)
     (case rest
       [x y width height radius]
-      (love.graphics.rectangle "line" x y width height radius radius)
+      (love-wrap.rectangle "line" x y width height radius radius)
       [{: x : y : width : height : w : h} radius]
-      (love.graphics.rectangle "line" x y (or width w) (or height h) radius radius)
+      (love-wrap.rectangle "line" x y (or width w) (or height h) radius radius)
       )
     (love.graphics.pop))
+
+  (fn drawLine [x1 y1 x2 y2]
+    (love.graphics.push :all)
+    ;; (love.graphics.setLineWidth 2)
+    (love.graphics.setColor _G.playdate.graphics._fg.r
+                            _G.playdate.graphics._fg.g
+                            _G.playdate.graphics._fg.b)
+    (love.graphics.line x1 y1 x2 y2)
+    (love.graphics.pop))
+
+  (fn drawCircleInRect [& rest]
+    (love.graphics.push :all)
+    (love.graphics.setColor _G.playdate.graphics._fg.r
+                            _G.playdate.graphics._fg.g
+                            _G.playdate.graphics._fg.b)
+    (case rest
+      [x y width height]
+      (let [x-rad (div width 2)
+            y-rad (div height 2)]
+        (love.graphics.ellipse "line" (+ x x-rad) (+ y y-rad)
+                               x-rad y-rad))
+      [{: x : y : width : height}]
+      (let [x-rad (div width 2)
+            y-rad (div height 2)]
+        (love.graphics.ellipse "line" (+ x x-rad) (+ y y-rad)
+                               x-rad y-rad)))
+    (love.graphics.pop)
+    )
 
   (fn lockFocus [canvas]
     (love.graphics.push :all)

@@ -8,7 +8,10 @@
     (tset _G.playdate.ui :gridview {}))
 
 (defmodule _G.playdate.ui.gridview
-  [animator (require :source.lib.playdate.CoreLibs.animator)]
+  [
+   animator (require :source.lib.playdate.CoreLibs.animator)
+   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   ]
  ;; TODO: support multiple sections
 
  (fn setNumberOfRows [self num]
@@ -131,7 +134,7 @@
          (self.backgroundImage:drawInRect 0 0 width height))
      (love.graphics.draw canvas quad inset.left inset.top)
      (love.graphics.pop)
-     (love.graphics.draw outer outerquad x y)
+     (love-wrap.draw outer outerquad x y)
      )
    )
 

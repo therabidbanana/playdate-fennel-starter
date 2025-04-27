@@ -1,5 +1,5 @@
 ; Playdate object helpers and misc
-(import-macros {: defns : div} :source.lib.macros)
+(import-macros {: defns : div : inspect} :source.lib.macros)
 
 (fn table.shallowcopy [orig other]
   (let [cloned (or other {})]
@@ -11,6 +11,7 @@
   [ds (require :source.lib.playdate.CoreLibs.datastore)
    keyboard (require :source.lib.playdate.CoreLibs.keyboard)
    sound (require :source.lib.playdate.CoreLibs.sound)
+   menu (require :source.lib.playdate.CoreLibs.menu)
    pathfinder (require :source.lib.playdate.CoreLibs.pathfinder)]
   (local input-state
          {:timer 0
@@ -303,6 +304,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (set love.mousereleased mousereleased)
     (set love.touchpressed touchpressed)
     (set love.touchreleased touchreleased)
+    (love.window.setTitle "Playdate Game")
     (love.window.setMode (+ (* 400 canvas-scale) (* (+ frame.left frame.right) canvas-scale))
                          (+ (* 240 canvas-scale) (* (+ frame.top frame.bottom) canvas-scale)))
     ;; (love.graphics.setBackgroundColor COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
@@ -355,6 +357,8 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   (fn love-draw-start []
     (love.graphics.clear COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
     (love.graphics.setCanvas canvas)
+    ;; Early update of offset can get lost (Love requires it in the draw loop)
+    ;; (love.graphics.translate _G.playdate.graphics._tx _G.playdate.graphics._ty)
     ;; TODO - do we always want this?
     (love.graphics.clear COLOR_WHITE.r COLOR_WHITE.g COLOR_WHITE.b 1)
     )
@@ -362,6 +366,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (keyboard.-maybeDraw)
     (love.graphics.setCanvas)
     (love.graphics.push :all)
+    (love.graphics.origin)
     (love.graphics.setShader)
     (love.graphics.setColor 0.8 0.7 0.2)
     (love.graphics.rectangle "fill" 0 0
@@ -406,6 +411,12 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
           (fn unpack [self]
             (values self.x self.y self.width self.height))
 
+          ;; TODO: handle point as input for x
+          (fn containsPoint [self x y]
+            (and (<= self.x x (+ self.x self.width))
+                 (<= self.y y (+ self.y self.height))
+                 ))
+
           (fn insetBy [self minus-x minus-y]
             (let [minus-y (or minus-y minus-x)
                   dx (div minus-x 2)
@@ -419,9 +430,10 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
               ))
 
           (fn new [x y width height]
-            {: x : y : width : height
-             :h height :w width
-             : insetBy : unpack})
+            (let [new-rect {: x : y : width : height
+                            :h height :w width}]
+              (setmetatable new-rect {:__index _G.playdate.geometry.rect})
+              new-rect))
           ))
 
   (fn getSecondsSinceEpoch []

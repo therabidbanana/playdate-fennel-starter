@@ -7,21 +7,28 @@
     (tset _G.playdate :graphics :imagetable {}))
 
 (defmodule _G.playdate.graphics.imagetable
-  [{: split} (require :source.lib.helpers)]
+  [{: split} (require :source.lib.helpers)
+   love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+   ]
 
   (fn getImage [{: quads : atlas} n]
-    {:draw (fn [x y]
+    {:draw (fn [self x y]
              ;; (love.graphics.push :all)
              ;; (love.graphics.setColor 1 1 1 1)
-             (love.graphics.draw atlas (?. quads n) x y)
+             (love-wrap.draw atlas (?. quads n) x y)
              ;; (love.graphics.pop)
-             )}
+             )
+     :getSize (fn [self]
+                (let [q (?. quads n)
+                      (x y w h) (q:getViewport)]
+                  (values w h))
+                )}
     )
 
   (fn drawImage [{: quads : atlas} n x y]
     ;; (love.graphics.push :all)
     ;; (love.graphics.setColor 1 1 1 1)
-    (love.graphics.draw atlas (?. quads n) x y)
+    (love-wrap.draw atlas (?. quads n) x y)
     ;; (love.graphics.pop)
     )
 
@@ -37,7 +44,7 @@
                    :gsub "%-" "%%-")
           all-files (love.filesystem.getDirectoryItems dir)
           matching  (?. (icollect [i v (ipairs all-files)]
-                          (if (string.match v prefix) v)) 1)
+                          (if (string.match v (.. "^" prefix)) v)) 1)
           ]
       (if matching
           (let [(w h) (string.match matching "%-(%d+)%-(%d+)" 2)

@@ -8,11 +8,13 @@
 
 (defmodule
  _G.playdate.graphics.nineSlice
- []
+ [
+  love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+  ]
 
  (fn drawInRect [self x y w h]
    (if (and (= self.cache-w w) (= self.cache-h h) false)
-       (love.graphics.draw self.cache-img x y)
+       (love-wrap.draw self.cache-img x y)
        (let [batch (love.graphics.newSpriteBatch self.img)
              mx self.inner-dims.x
              my self.inner-dims.y
@@ -51,7 +53,7 @@
          (tset self :cache-img batch)
          (tset self :cache-w w)
          (tset self :cache-h h)
-         (love.graphics.draw batch x y)
+         (love-wrap.draw batch x y)
          ))
    )
 

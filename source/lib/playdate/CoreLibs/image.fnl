@@ -8,17 +8,24 @@
 
 (defmodule
  _G.playdate.graphics.image
- []
+ [
+  love-wrap (require :source.lib.playdate.CoreLibs.love-wrap)
+  ]
+
+ (fn getSize [self]
+   (self.image:getDimensions))
+
  (fn draw [self x y]
-   (love.graphics.draw self.image x y)
+   (love-wrap.draw self.image x y)
    )
+
  (fn drawFaded [self x y alpha]
    (let [shader (love.graphics.getShader)]
      (love.graphics.push :all)
      ;; TODO: shader should support faded
      (love.graphics.setShader)
      (love.graphics.setColor (/ 176 255) (/ 174 255) (/ 167 255) alpha)
-     (love.graphics.draw self.image x y)
+     (love-wrap.draw self.image x y)
      (love.graphics.setShader shader)
      (love.graphics.pop))
    )
@@ -30,5 +37,5 @@
          image (if height
                    (love.graphics.newCanvas path-or-data height)
                    (love.graphics.newImage path-or-data))]
-     {: image : draw : drawFaded})
+     {: image : draw : drawFaded : getSize})
    ))

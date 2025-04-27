@@ -14,7 +14,7 @@
                (do
                  (print (.. ,inspected " => "))
                  (printTable ,val))
-               (print (.. ,inspected " => " ,val)))
+               (print (.. ,inspected " => " (if (= nil ,val) "nil" ,val))))
            result#))))
 
 (fn div [a b]
@@ -35,10 +35,10 @@
                     (= t (sym :var)) name
                     (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
-              (values (tostring name) name))]
-    `(let ,bindings
-       ,forms
-       ,map)))
+              (values (tostring name) name))
+        let-block `(let ,bindings ,(unpack forms))]
+    (table.insert let-block map)
+    let-block))
 
 (fn clamp [min x max]
   `(math.max (math.min ,x ,max) ,min))
@@ -52,19 +52,22 @@
                     (= t (sym :var)) name
                     (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
-              (values (tostring name) name))]
-    `(let ,bindings
-       ,forms
-       (each [k# v# (pairs ,map)]
-         (tset ,module k# v#))
-       ,module)))
+              (values (tostring name) name))
+        let-block `(let ,bindings ,(unpack forms))
+        each-block `(each [k# v# (pairs ,map)] (tset ,module k# v#))
+        ]
+    (table.insert let-block each-block)
+    (table.insert let-block module)
+    let-block))
 
 (fn love-hooks [bindings ...]
   (let [code-load (defns :game bindings ...)]
     `(do
        (fn _G.printTable [tbl#]
          (fn tostr# [val#]
-           (if (= (type val#) :table)
+           (if (= val# nil)
+               (.. "nil")
+               (= (type val#) :table)
                (.. "{"
                    (table.concat (icollect [i# v# (pairs val#)]
                                    (.. i# " = " (or (tostr# v#) "nil"))) "\n")
@@ -95,6 +98,13 @@
                             (let [cur-time# (love.timer.getTime)]
                               (playdate.love-draw-start)
                               (game#.draw-hook)
+                              (when (?. game# :debug-draw)
+                                (let [shader# (love.graphics.getShader)]
+                                  (shader#:send "debugDraw" true)
+                                  (game#.debug-draw)
+                                  (shader#:send "debugDraw" false)
+                                  )
+                                )
                               (playdate.love-draw-end)
                               (if (< love.next-time cur-time#)
                                   (tset love :next-time cur-time#)
@@ -107,7 +117,10 @@
   (let [code-load (defns :game bindings ...)]
     `(let [game# ,code-load]
        (game#.load-hook)
-       (tset playdate :update (fn [] (game#.update-hook) (game#.draw-hook))))))
+       (tset playdate :update (fn [] (game#.update-hook) (game#.draw-hook)))
+       (if (?. game# :debug-draw)
+           (tset playdate :debugDraw (fn [] (game#.debug-draw))))
+       )))
 
 (fn pd/load [bindings ...]
   (if _G.LOVE

@@ -14,8 +14,9 @@
 (pd/import :CoreLibs/graphics)
 (pd/import :CoreLibs/sprites)
 (pd/import :CoreLibs/timer)
+(pd/import :CoreLibs/crank)
 
-(global $config {:debug true})
+(global $config {:debug false})
 
 (pd/load
  [{: scene-manager} (require :source.lib.core)]
@@ -29,5 +30,7 @@
  (fn draw-hook []
    (scene-manager:draw!)
    )
+ (fn debug-draw []
+   (scene-manager:debug-draw!))
  )
 

@@ -26,6 +26,10 @@
        (self.sound:play)
        )
 
+     (fn isPlaying [self]
+       (self.sound:isPlaying)
+       )
+
      (fn new [file]
        (let [sound (love.audio.newSource (.. file :.ogg) :static)
              obj {: sound}]
@@ -48,6 +52,10 @@
        (if (= repeats 0)
            (self.sound:setLooping true))
        (self.sound:play)
+       )
+
+     (fn isPlaying [self]
+       (self.sound:isPlaying)
        )
 
      (fn new [file]

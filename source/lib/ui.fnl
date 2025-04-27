@@ -8,6 +8,8 @@
   (fn push-component! [$ui comp]
     (table.insert $ui.stack comp)
     )
+  (fn pop-all! [$ui]
+    (tset $ui :stack []))
   (fn pop-component! [$ui]
     (table.remove $ui.stack))
 

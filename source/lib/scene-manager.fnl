@@ -24,17 +24,20 @@
     (tset $ :last-screen (gfx.getDisplayImage))
     (tset $ :fade-out-anim (playdate.graphics.animator.new 300 0 -400 playdate.easingFunctions.outCubic))
     (gfx.clear)
-    (if (and scene (?. scene :exit!)) (scene:exit! $.game-state))
     (sprite.removeAll)
+    (if (and scene (?. scene :exit!)) (scene:exit! $.game-state))
     )
 
   (fn select! [{: active : scenes &as $} name]
-    (if active ($:exit-scene! active))
-    (tset $ :active (?. scenes name))
-    ($.active:enter! $.game-state))
+    (tset $ :new-scene name))
 
-  (fn tick! [{: active &as $}]
-    (if (and active (?. active :tick!)) (active:tick! $.game-state))
+  (fn tick! [{: active : new-scene : scenes &as $}]
+    (when (not= new-scene nil)
+      (if active ($:exit-scene! active))
+      (tset $ :active (?. scenes new-scene))
+      (tset $ :new-scene nil)
+      ($.active:enter! $.game-state))
+    (if (and $.active (?. $.active :tick!)) ($.active:tick! $.game-state))
     (playdate.timer.updateTimers)
     (animation.blinker.updateAll)
     )
@@ -56,7 +59,11 @@
   (fn draw! [{: active : fade-out-anim : last-screen &as $}]
     (sprite.update)
     (if $config.debug (playdate.drawFPS 380 20))
-    (if (and active (?. active :draw!)) (active:draw!))
+    (if (and active (?. active :draw!)) (active:draw! $.game-state))
+    )
+
+  (fn debug-draw! [{: active : fade-out-anim : last-screen &as $}]
+    (if (and $config.debug active (?. active :debug-draw!)) (active:debug-draw!))
     )
 
   {: add-scene!
@@ -64,6 +71,7 @@
    : exit-scene!
    : select!
    : draw!
+   : debug-draw!
    : transition-draw!
    : reset-state!
    : tick!

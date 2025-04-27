@@ -4,13 +4,13 @@
 (fn defns [ns-name bindings & forms]
   (let [names (icollect [_ [t name & def] (ipairs forms)]
                 (if (= t (sym :local)) name
+                    (= t (sym :var)) name
                     (= t (sym :fn)) name))
         map (collect [_ name (ipairs names)]
-              (values (tostring name) name))]
-
-    `(let ,bindings
-       ,forms
-       ,map)))
+              (values (tostring name) name))
+        let-block `(let ,bindings ,(unpack forms))]
+    (table.insert let-block map)
+    let-block))
 
 (fn deflevel [levelname bindings & forms]
   (let [json (require :lunajson)
