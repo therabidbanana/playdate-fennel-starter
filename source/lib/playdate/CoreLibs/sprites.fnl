@@ -52,7 +52,16 @@
                  (playdate.graphics.setDrawOffset sprite.x sprite.y)
                  (sprite:draw 0 0)
                  )
-               (sprite:draw sprite.x sprite.y))
+               ;; We want to draw offset if using image
+               (?. sprite :image)
+               (sprite:draw sprite.x sprite.y)
+               ;; Custom draw functions should think they are anchored at x, y
+               ;; TODO: Is this right?
+               (do
+                 (playdate.graphics.setDrawOffset sprite.x sprite.y)
+                 (sprite:draw 0 0)
+                 )
+               )
            (playdate.graphics.popContext)
            )))
    )
