@@ -202,8 +202,8 @@
                (if (?. nodes nodeid)
                    (tset connections nodeid (-adjacentNodeIds x y width height diagonals))))
              ))
-         (graph:addConnections connections)
          (setmetatable graph {:__index _G.playdate.pathfinder.graph})
+         (graph:addConnections connections)
          graph)
        )
 
