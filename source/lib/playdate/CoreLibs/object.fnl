@@ -13,9 +13,12 @@
    sound (require :source.lib.playdate.CoreLibs.sound)
    menu (require :source.lib.playdate.CoreLibs.menu)
    pathfinder (require :source.lib.playdate.CoreLibs.pathfinder)]
+  (local drag-scale 0.2)
   (local input-state
          {:timer 0
           :elapsed 0
+          :crank
+          {:active false :movement 0 :angle 0 :last 0 :accel 0}
           :key-map
           {:a "s" :b "a"
            :up "up" :down "down" :left "left" :right "right"}
@@ -26,7 +29,7 @@
           {:a -1 :b -1 :up -1 :down -1 :left -1 :right -1}
           ;; Virtual mapping button input with keyboard / mouse
           :love-press
-          {:a false :b false :up false :down false :left false :right false}
+          {:crank false :a false :b false :up false :down false :left false :right false}
           ;; Tracks touch ids
           :touches {}
           :just-pressed
@@ -35,12 +38,17 @@
           {:a false :b false :up false :down false :left false :right false}
           })
   (local frame {:top 20 :bottom 20 :left 120 :right 220})
-  (local fake-buttons [{:btn :b
-                        :x (- frame.left 110) :y (+ 20 frame.top)
+  (local fake-buttons [{:btn :crank
+                        :radius 35
+                        :x (- frame.left 95) :y (+ 180 frame.top)
+                        :w 70 :h 70
+                        }
+                       {:btn :b
+                        :x (- frame.left 110) :y (+ -10 frame.top)
                         :radius 35
                         :w 70 :h 70}
                        {:btn :a
-                        :x (- frame.left 80) :y (+ 120 frame.top)
+                        :x (- frame.left 80) :y (+ 80 frame.top)
                         :radius 35
                         :w 70 :h 70}
                        {:btn :up
@@ -281,6 +289,8 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     (let [real-x (/ x canvas-scale)
           real-y (/ y canvas-scale)]
       (each [i btn (ipairs (or input-state.mouse-pressed []))]
+        (if (= btn :crank)
+            (tset input-state :crank :accel 0))
         (tset input-state :love-press btn false))
       (tset input-state :mouse-pressed [])
       ))
@@ -297,13 +307,52 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
         (tset input-state :touches id nil))
       ))
 
+  (fn wheelmoved [x y]
+    (let [y-scaled (* y 1.5)
+          new-angle (+ input-state.crank.angle y-scaled)
+          new-angle (if (< new-angle 0)
+                        (math.fmod (+ 360 new-angle) 360)
+                        (math.fmod new-angle 360))
+          angle-changed? (not= new-angle input-state.crank.angle)]
+      (tset input-state :crank :movement (+ input-state.crank.movement y-scaled))
+      (tset input-state :crank :last input-state.crank.angle)
+      (tset input-state :crank :angle new-angle)
+      (if angle-changed?
+          (tset input-state :crank :active true))
+      ))
+
+  (fn mousemoved [x y dx dy]
+    (if input-state.love-press.crank
+        (let [y-scaled (+ (* dy drag-scale) (* dx drag-scale))
+              accel (+ input-state.crank.accel y-scaled)
+              new-angle (+ input-state.crank.angle accel)]
+          (tset input-state :crank :accel accel)
+          (tset input-state :crank :movement (+ input-state.crank.movement accel))
+          (tset input-state :crank :last input-state.crank.angle)
+          (tset input-state :crank :angle new-angle)
+          )))
+
+  (fn touchmoved [id x y dx dy]
+    (if (= (. input-state :touches id) :crank)
+        (let [y-scaled (+ (* dy drag-scale) (* dx drag-scale))
+              accel (+ input-state.crank.accel y-scaled)
+              new-angle (+ input-state.crank.angle accel)]
+          (tset input-state :crank :accel accel)
+          (tset input-state :crank :movement (+ input-state.crank.movement accel))
+          (tset input-state :crank :last input-state.crank.angle)
+          (tset input-state :crank :angle new-angle)
+          )))
+
   (fn love-load []
     (set love.keypressed keypressed)
     (set love.keyreleased keyreleased)
     (set love.mousepressed mousepressed)
     (set love.mousereleased mousereleased)
+    (set love.mousemoved mousemoved)
     (set love.touchpressed touchpressed)
     (set love.touchreleased touchreleased)
+    (set love.touchmoved touchmoved)
+    (set love.wheelmoved wheelmoved)
     (love.window.setTitle "Playdate Game")
     (love.window.setMode (+ (* 400 canvas-scale) (* (+ frame.left frame.right) canvas-scale))
                          (+ (* 240 canvas-scale) (* (+ frame.top frame.bottom) canvas-scale)))
@@ -384,6 +433,20 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
       (let [is-pressed? (. input-state :love-press btn.btn)
             push-inset (if is-pressed? 1 0)]
         (case btn
+          {:btn :crank : radius : x : y }
+          (let [crank-angle input-state.crank.angle
+                rads (math.rad crank-angle)
+                crank-x (* (math.cos rads) radius)
+                crank-y (* (math.sin rads) radius)
+                knob-offset (if is-pressed? -0.1 0)
+                ]
+            (love.graphics.setColor 0.2 0.2 0.2)
+            (love.graphics.circle "line" (* (+ x 0 radius) canvas-scale) (* (+ y 0 radius) canvas-scale)
+                                  (* radius canvas-scale))
+            (love.graphics.setColor (+ 0.8 knob-offset) (+ 0.75 knob-offset) (+ 0.3 knob-offset))
+            (love.graphics.circle "fill" (* (+ x crank-x radius) canvas-scale) (* (+ y crank-y radius) canvas-scale)
+                                  (* 10 canvas-scale))
+            )
           {: radius : x : y : btn}
           (do (love.graphics.setColor 0.2 0.2 0.2)
               (love.graphics.circle "fill" (* (+ x 1 radius) canvas-scale) (* (+ y 1 radius) canvas-scale)
@@ -450,8 +513,12 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     )
 
   (fn getCrankChange []
-    "TODO"
-    (values 0 0))
+    (let [scale 0.5
+          change input-state.crank.movement
+          acceleration (math.rad (math.pow change 2))
+          accelerated (* change acceleration)]
+      (tset input-state :crank :movement 0)
+      (values change accelerated)))
 
   (tset _G.playdate :getSecondsSinceEpoch getSecondsSinceEpoch)
   (tset _G.playdate :getCrankChange getCrankChange)
