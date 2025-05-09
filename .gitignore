@@ -5,3 +5,4 @@ source/**.lua
 /.sentry-native/*
 dist/
 node_modules/
+fonts/*.bmfnt
